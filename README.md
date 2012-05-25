@@ -1,5 +1,5 @@
 voronoi-map-haxe
-================
+----------------
 
 Haxe port of Amit Patel's mapgen2 https://github.com/amitp/mapgen2
 
@@ -7,6 +7,6 @@ Based on commit: 671303ad1c5aff4b2f90726c1f2bcb1e58174cec
 
 Flash dependencies removed.
 
-Make sure to select "Recursive" option when cloning so libs are also cloned.
+Make sure you run ``git submodule update --init`` to clone the dependent libraries.
 
 https://github.com/rjanicek/voronoi-map-haxe

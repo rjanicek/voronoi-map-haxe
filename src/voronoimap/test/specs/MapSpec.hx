@@ -15,17 +15,17 @@ class MapSpec {
 	public function new() {
 		J.describe("Map", function() {
 
-			var map = new Map(100);
+			var map = new Map({width:100.0, height:100.0});
 			map.newIsland(IslandShape.makeRadial(1), 1);
 
 			J.it("should place points", function() {
 				map.go(0, 1);
-				J.expect(map.points.length).toBe(Map.NUM_POINTS);
+				J.expect(map.points.length).toBe(map.NUM_POINTS);
 			});
 			
 			J.it("should improve points", function() {
 				map.go(1, 2);
-				J.expect(map.points.length).toBe(Map.NUM_POINTS);
+				J.expect(map.points.length).toBe(map.NUM_POINTS);
 			});
 
 			J.it("should build a graph", function() {

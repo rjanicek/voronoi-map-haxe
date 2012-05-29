@@ -18,12 +18,16 @@ using as3.ac3core.PointCore;
 
 class Map {
 
-    static public var NUM_POINTS:Int = 100;
-    static public var LAKE_THRESHOLD:Number = 0.3;  // 0 to 1, fraction of water corners for water polygon
-    static public var NUM_LLOYD_ITERATIONS:Int = 2;
+    public var NUM_POINTS:Int;
+	/**
+	 * Lake Threshold
+	 * 0 to 1, fraction of water corners for water polygon
+	 */
+    public var LAKE_THRESHOLD:Number;
+    public var NUM_LLOYD_ITERATIONS:Int;
 
     // Passed in by the caller:
-    public var SIZE:Number;
+    public var SIZE:Size;
     
     // Island shape is controlled by the islandRandom seed and the
     // type of island, passed in when we set the island shape. The
@@ -43,9 +47,12 @@ class Map {
     public var corners:Vector<Corner>;
     public var edges:Vector<Edge>;
 
-	public function new(size:Number) {
+	public function new(size:Size, numPoints = 1000, lakeThreshold = 0.3, numlLloydIterations = 2) {
 		mapRandom = new PM_PRNG();
 		SIZE = size;
+		NUM_POINTS = numPoints;
+		LAKE_THRESHOLD = lakeThreshold;
+		NUM_LLOYD_ITERATIONS = numlLloydIterations;
 		reset();
 	}
 	
@@ -131,7 +138,7 @@ class Map {
       stages.push
         ( ["Build graph...",
              function():Void {
-               var voronoi:Voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE, SIZE));
+               var voronoi:Voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
                buildGraph(points, voronoi);
                improveCorners();
                voronoi.dispose();
@@ -210,8 +217,8 @@ class Map {
     public function generateRandomPoints():Vector<Point> {
       var p:Point, i:Int, points:Vector<Point> = new Vector<Point>();
       for (i in 0...NUM_POINTS) {
-        p = {x:mapRandom.nextDoubleRange(10, SIZE-10),
-		y:mapRandom.nextDoubleRange(10, SIZE-10) };
+        p = {x:mapRandom.nextDoubleRange(10, SIZE.width-10),
+		y:mapRandom.nextDoubleRange(10, SIZE.height-10) };
         points.push(p);
       }
       return points;
@@ -233,7 +240,7 @@ class Map {
 
       var i:Int, p:Point, q:Point, voronoi:Voronoi, region:Vector<Point>;
       for (i in 0...NUM_LLOYD_ITERATIONS) {
-        voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE, SIZE));
+        voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
         for (p in points) {
             region = voronoi.region(p);
             p.x = 0.0;
@@ -367,8 +374,8 @@ class Map {
         q.index = corners.length;
         corners.push(q);
         q.point = point;
-        q.border = (point.x == 0 || point.x == SIZE
-                    || point.y == 0 || point.y == SIZE);
+        q.border = (point.x == 0 || point.x == SIZE.width
+                    || point.y == 0 || point.y == SIZE.height);
         q.touches = new Vector<Center>();
         q.protrudes = new Vector<Edge>();
         q.adjacent = new Vector<Corner>();
@@ -688,7 +695,7 @@ class Map {
     public function createRivers():Void {
       var i:Int, q:Corner, edge:Edge;
       
-      for (i in 0...Std.int(SIZE/2)) {
+      for (i in 0...Std.int((SIZE.width + SIZE.height) / 4)) {
         q = corners[mapRandom.nextIntRange(0, corners.length-1)];
         if (q.ocean || q.elevation < 0.3 || q.elevation > 0.9) continue;
         // Bias rivers to go west: if (q.downslope.x > q.x) continue;
@@ -820,6 +827,6 @@ class Map {
 	
     // Determine whether a given point should be on the island or in the water.
     public function inside(p:Point):Boolean {
-      return islandShape({x:2*(p.x/SIZE - 0.5), y : 2*(p.y/SIZE - 0.5)});
+      return islandShape({x:2*(p.x/SIZE.width - 0.5), y : 2*(p.y/SIZE.height - 0.5)});
     }
 }

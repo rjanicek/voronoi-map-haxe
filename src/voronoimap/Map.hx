@@ -25,6 +25,7 @@ class Map {
 	 */
     public var LAKE_THRESHOLD:Number;
     public var NUM_LLOYD_ITERATIONS:Int;
+	public var RIVER_CHANCE:Int;
 
     // Passed in by the caller:
     public var SIZE:Size;
@@ -47,12 +48,13 @@ class Map {
     public var corners:Vector<Corner>;
     public var edges:Vector<Edge>;
 
-	public function new(size:Size, numPoints = 1000, lakeThreshold = 0.3, numlLloydIterations = 2) {
+	public function new(size:Size, numPoints = 1000, lakeThreshold = 0.3, numlLloydIterations = 2, riverChance:Int = null) {
 		mapRandom = new PM_PRNG();
 		SIZE = size;
 		NUM_POINTS = numPoints;
 		LAKE_THRESHOLD = lakeThreshold;
 		NUM_LLOYD_ITERATIONS = numlLloydIterations;
+		RIVER_CHANCE = riverChance.isNull() ? Std.int((SIZE.width + SIZE.height) / 4) : riverChance;
 		reset();
 	}
 	
@@ -187,7 +189,7 @@ class Map {
                calculateWatersheds();
 
                // Create rivers.
-               createRivers();
+               createRivers(RIVER_CHANCE);
 
                // Determine moisture at corners, starting at rivers
                // and lakes, but not oceans. Then redistribute
@@ -690,12 +692,15 @@ class Map {
         }
     }
 	
-    // Create rivers along edges. Pick a random corner point, then
-    // move downslope. Mark the edges and corners as rivers.
-    public function createRivers():Void {
+	/**
+	 * Create rivers along edges. Pick a random corner point,
+	 * then move downslope. Mark the edges and corners as rivers.
+	 * @param	riverChance Higher = more rivers.
+	 */
+    public function createRivers(riverChance:Int):Void {
       var i:Int, q:Corner, edge:Edge;
       
-      for (i in 0...Std.int((SIZE.width + SIZE.height) / 4)) {
+      for (i in 0...riverChance) {
         q = corners[mapRandom.nextIntRange(0, corners.length-1)];
         if (q.ocean || q.elevation < 0.3 || q.elevation > 0.9) continue;
         // Bias rivers to go west: if (q.downslope.x > q.x) continue;

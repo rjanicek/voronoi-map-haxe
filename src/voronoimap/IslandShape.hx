@@ -48,16 +48,23 @@ class IslandShape {
     return inside;
   }
 
-  // The Perlin-based island combines perlin noise with the radius
-	static public function makePerlin(seed:Int):Point->Boolean {
-
+	/**
+	 * The Perlin-based island combines perlin noise with the radius
+	 * @param	seed
+	 * @param	landRatio 0 = least sea, 1 = most sea
+	 * @return
+	 */
+	static public function makePerlin(seed:Int, seaRatio:Float = 0.5):Point->Boolean {
+		var landRatioMinimum = 0.1;
+		var landRatioMaximum = 0.5;
+		seaRatio = ((landRatioMaximum - landRatioMinimum) * seaRatio) + landRatioMinimum;  //min: 0.1 max: 0.5
 		var perlin = new OptimizedPerlin(seed, 8).make(256, 256, 1.0, 1.0, 1.0); // var perlin:BitmapData = new BitmapData(256, 256);
 		//perlin.perlinNoise(64, 64, 8, seed, false, true);
 
 		return function (q:Point):Boolean {
 			var c:Number = (Array2dCore.get(perlin, Std.int((q.x+1)*128), Std.int((q.y+1)*128)) & 0xff) / 255.0;
 			//var c:Number = (perlin.getPixel(Std.int((q.x+1)*128), Std.int((q.y+1)*128)) & 0xff) / 255.0;
-			return c > (0.3 + 0.3 * q.distanceFromOrigin() * q.distanceFromOrigin());
+			return c > (seaRatio + seaRatio * q.distanceFromOrigin() * q.distanceFromOrigin());
 		};
 	}
   

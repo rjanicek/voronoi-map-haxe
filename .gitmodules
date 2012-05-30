@@ -1,6 +1,6 @@
-[submodule "libs/jasmine-haxe"]
-	path = libs/jasmine-haxe
+[submodule "lib/jasmine-haxe"]
+	path = lib/jasmine-haxe
 	url = git://github.com/rjanicek/jasmine-haxe.git
-[submodule "libs/janicek-core-haxe"]
-	path = libs/janicek-core-haxe
+[submodule "lib/janicek-core-haxe"]
+	path = lib/janicek-core-haxe
 	url = git://github.com/rjanicek/janicek-core-haxe.git

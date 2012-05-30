@@ -28,7 +28,7 @@ class Main {
 		new MapSpec();
 		new VoronoiSpec();
 
-		Jasmine.getEnv().addReporter(Jasmine.newTrivialReporter());
+		Jasmine.getEnv().addReporter(Jasmine.newHtmlReporter());
 		Jasmine.getEnv().execute();
 		trace("Done testing.");		
 	}

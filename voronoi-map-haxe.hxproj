@@ -16,8 +16,8 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="libs\jasmine-haxe" />
-    <class path="libs\janicek-core-haxe\src" />
+    <class path="lib\janicek-core-haxe\src" />
+    <class path="lib\jasmine-haxe" />
   </classpaths>
   <!-- Build options -->
   <build>

@@ -2,7 +2,7 @@ package voronoimap;
 
 import as3.as3types.TypeDefs;
 import co.janicek.core.array.Array2dCore;
-import co.janicek.core.math.OptimizedPerlin;
+import co.janicek.core.math.PerlinNoise;
 import de.polygonal.math.PM_PRNG;
 
 using as3.ac3core.PointCore;
@@ -58,7 +58,7 @@ class IslandShape {
 		var landRatioMinimum = 0.1;
 		var landRatioMaximum = 0.5;
 		seaRatio = ((landRatioMaximum - landRatioMinimum) * seaRatio) + landRatioMinimum;  //min: 0.1 max: 0.5
-		var perlin = new OptimizedPerlin(seed, 8).make(256, 256, 1.0, 1.0, 1.0); // var perlin:BitmapData = new BitmapData(256, 256);
+		var perlin = new PerlinNoise(seed, 8).make(256, 256, 1.0, 1.0, 1.0); // var perlin:BitmapData = new BitmapData(256, 256);
 		//perlin.perlinNoise(64, 64, 8, seed, false, true);
 
 		return function (q:Point):Boolean {

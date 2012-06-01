@@ -6,6 +6,8 @@ import co.janicek.core.math.PerlinNoise;
 import de.polygonal.math.PM_PRNG;
 
 using as3.ac3core.PointCore;
+using co.janicek.core.array.Array2dCore;
+using Std;
 
 /**
  * Factory class to build the 'inside' function that tells us whether
@@ -58,7 +60,7 @@ class IslandShape {
 		var landRatioMinimum = 0.1;
 		var landRatioMaximum = 0.5;
 		seaRatio = ((landRatioMaximum - landRatioMinimum) * seaRatio) + landRatioMinimum;  //min: 0.1 max: 0.5
-		var perlin = new PerlinNoise(seed, 8).make(256, 256, 1.0, 1.0, 1.0); // var perlin:BitmapData = new BitmapData(256, 256);
+		var perlin = PerlinNoise.makePerlinNoise(256, 256, 1.0, 1.0, 1.0, seed, 8); // var perlin:BitmapData = new BitmapData(256, 256);
 		//perlin.perlinNoise(64, 64, 8, seed, false, true);
 
 		return function (q:Point):Boolean {
@@ -68,16 +70,15 @@ class IslandShape {
 		};
 	}
   
-  // The square shape fills the entire space with land
-  static public function makeSquare(seed:Int):Point->Boolean {
-    return function (q:Point):Boolean {
-      return true;
-    };
-  }
-
+	// The square shape fills the entire space with land
+	static public function makeSquare():Point->Boolean {
+		return function (q:Point):Boolean {
+			return true;
+		};
+	}
 
   // The blob island is shaped like Amit's blob logo
-  static public function makeBlob(seed:Int):Point->Boolean {
+  static public function makeBlob():Point->Boolean {
     return function(q:Point):Boolean {
       var eye1:Boolean = { x:q.x - 0.2, y:q.y / 2 + 0.2 } .distanceFromOrigin() < 0.05;
       var eye2:Boolean = { x:q.x + 0.2, y:q.y / 2 + 0.2 } .distanceFromOrigin() < 0.05;
@@ -85,6 +86,18 @@ class IslandShape {
       return body && !eye1 && !eye2;
     };
   }
+  
+	/**
+	 * Make island from bitmap.
+	 */
+	static public function makeBitmap( bitmap : Array<Array<Bool>> ) : Point -> Boolean {
+		var dimensions = bitmap.dimensions();
+		return function( q : Point ) : Boolean {
+			var x = ((q.x + 1) / 2) * dimensions.x;
+			var y = ((q.y + 1) / 2) * dimensions.y;
+			return bitmap.get(x.int(), y.int());
+		};
+	}
 
 	
 	

@@ -19,10 +19,6 @@ using as3.ac3core.PointCore;
 class Map {
 
     public var NUM_POINTS:Int;
-	/**
-	 * Lake Threshold
-	 * 0 to 1, fraction of water corners for water polygon
-	 */
     public var LAKE_THRESHOLD:Number;
     public var NUM_LLOYD_ITERATIONS:Int;
 	public var RIVER_CHANCE:Int;
@@ -48,6 +44,14 @@ class Map {
     public var corners:Vector<Corner>;
     public var edges:Vector<Edge>;
 
+	/**
+	 * Make a new map.
+	 * @param	size width and height of map
+	 * @param	numPoints default = 1000
+	 * @param	lakeThreshold 0 to 1, fraction of water corners for water polygon, default = 0.3
+	 * @param	numlLloydIterations default = 2
+	 * @param	riverChance 0 = no rivers, > 0 = more rivers, default = map area / 4
+	 */
 	public function new(size:Size, numPoints = 1000, lakeThreshold = 0.3, numlLloydIterations = 2, riverChance:Int = null) {
 		mapRandom = new PM_PRNG();
 		SIZE = size;

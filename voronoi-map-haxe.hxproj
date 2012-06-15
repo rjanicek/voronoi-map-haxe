@@ -18,14 +18,15 @@
     <class path="src" />
     <class path="lib\janicek-core-haxe\src" />
     <class path="lib\jasmine-haxe" />
+    <class path="lib\html5-haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
     <option directives="" />
     <option flashStrict="False" />
-    <option mainClass="voronoimap.test.Main" />
+    <option mainClass="voronoimap.Main" />
     <option enabledebug="False" />
-    <option additional="-debug" />
+    <option additional="-debug&#xA;--dead-code-elimination" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -40,7 +41,7 @@
     <!-- example: <hidden path="..." /> -->
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand />
+  <preBuildCommand>$(CompilerPath)\haxe $(ProjectDir)\build-test.hxml</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->

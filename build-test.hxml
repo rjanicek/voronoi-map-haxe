@@ -1,0 +1,7 @@
+-cp test/src/
+-cp src/
+-cp lib/janicek-core-haxe/src/
+-cp lib/jasmine-haxe/
+-js test/bin/voronoi-map-test.js
+-main Main
+-debug

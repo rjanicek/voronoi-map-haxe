@@ -4,3 +4,6 @@
 [submodule "lib/janicek-core-haxe"]
 	path = lib/janicek-core-haxe
 	url = git://github.com/rjanicek/janicek-core-haxe.git
+[submodule "lib/html5-haxe"]
+	path = lib/html5-haxe
+	url = git://github.com/rjanicek/html5-haxe.git

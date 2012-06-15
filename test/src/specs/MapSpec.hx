@@ -1,7 +1,12 @@
-package voronoimap.test.specs;
+package specs;
 
 import jasmine.J;
+import voronoimap.IslandShape;
+import voronoimap.Lava;
 import voronoimap.Map;
+import voronoimap.NoisyEdges;
+import voronoimap.Roads;
+import voronoimap.Watersheds;
 
 using Lambda;
 

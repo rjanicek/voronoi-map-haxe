@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>voronoi-map-haxe</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="language" content="en" />
+	
+	<style>
+	
+	fieldset {
+		position:absolute;
+		top:10px;
+		left:10px;
+		font-size: 11px; font-family: Monaco, "Lucida Console", monospace; line-height: 14px; color: #333333;
+		background:#C38EC7;
+		-moz-border-radius:5px;  
+		border-radius: 5px;  
+		-webkit-border-radius: 5px;
+	}
+	
+	label {
+		display: block;
+		width: 125px;
+		float: left;
+	}
+	
+	input[type=text] {
+		width: 110px;
+	}
+	
+	br {
+		clear: both;
+	}
+	
+	#seed,#shapeSeed {
+		width: 50px;
+	}
+	
+	</style>
+</head>
+<body style="margin:0px;padding:0px;">
+	<fieldset id="fieldset">
+		<div id="fields">
+			<div style="font-size:15px;">voronoi-map-haxe</div>
+			<br/>
+			<a href="https://github.com/rjanicek/voronoi-map-haxe">source code</a>
+			<a href="http://rjanicek.github.com/voronoi-map-haxe/specs">specs</a>
+			<hr/>
+			<div><label for="seed" title="integer or text">seed</label><input id="seed" type="text" value="haxe!" /><button id="random">random</button></div>
+			<div>
+				<label for="islandShape">island shape</label>
+				<select id="islandShape">
+					<option>bitmap</option>
+					<option>blob</option>
+					<option selected>perlin</option>
+					<option>radial</option>
+					<option>square</option>
+				</select>
+			</div>
+			<div><label for="shapeSeed" title="integer or text">island shape seed</label><input id="shapeSeed" type="text" value="haxe!" /><button id="shapeRandom">random</button></div>
+			<div style="display:none;"><label for="bitmapUrl" title="black & white images work best">image url</label><input id="bitmapUrl" type="text" value="world-map.jpg" /></div>
+			<div style="display:none;"><label for="islandFactor" title="1.0 means no small islands; 2.0 leads to a lot">island factor</label><input id="islandFactor" type="text" value="1.07" /></div>
+			<div><label for="oceanRatio" title="0 = least ocean, 1 = most ocean">ocean ratio</label><input id="oceanRatio" type="text" value="0.5" /></div>
+			<div><label for="width">width</label><input id="width" type="text" /></div>
+			<div><label for="height">height</label><input id="height" type="text" /></div>
+			<div><label for="numberOfPoints">number of points</label><input id="numberOfPoints" type="text" value="1000" /></div>
+			<div><label for="lakeThreshold" title="0 to 1, fraction of water corners for water polygon">lake threshold</label><input id="lakeThreshold" type="text" value="0.3" /></div>
+			<div><label for="lloydIterations">number of lloyd iterations</label><input id="lloydIterations" type="text" value="2" /></div>
+			<div><label for="riverChance" title="0 = no rivers, > 0 = more rivers">river chance</label><input id="riverChance" type="text" value="100" /></div>
+			<div>
+				<label for="view">view</label>
+				<select id="view">
+					<option>debug polygons</option>
+					<option selected>smooth</option>
+				</select>
+			</div>
+			<div><label for="addNoise">add noise</label><input id="addNoise" type="checkbox" checked /></div>
+			<br/>
+			<div style="text-align:center;">
+				<button id="generate">generate</button>
+			</div>
+		</div>
+		<a id="toggle" style="float:right;">hide</a>
+	</fieldset>
+	<script src="voronoi-map.js"></script>
+</body>
+</html>

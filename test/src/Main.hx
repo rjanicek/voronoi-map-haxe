@@ -1,19 +1,12 @@
-package voronoimap.test;
-
 import haxe.Firebug;
 import jasmine.Jasmine;
 import js.Lib;
-import voronoimap.test.specs.AS3Spec;
-import voronoimap.test.specs.ConversionCoreSpec;
-import voronoimap.test.specs.MapSpec;
-import voronoimap.test.specs.PointCoreSpec;
-import voronoimap.test.specs.PrngSpec;
-import voronoimap.test.specs.VoronoiSpec;
-
-/**
- * ...
- * @author Richard Janicek
- */
+import specs.AS3Spec;
+import specs.ConversionCoreSpec;
+import specs.MapSpec;
+import specs.PointCoreSpec;
+import specs.PrngSpec;
+import specs.VoronoiSpec;
 
 class Main {
 	

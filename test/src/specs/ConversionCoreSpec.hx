@@ -1,4 +1,4 @@
-package voronoimap.test.specs;
+package specs;
 
 import as3.ac3core.NumberCore;
 import as3.as3types.Rectangle;

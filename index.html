@@ -19,6 +19,7 @@
 	}
 	
 	label {
+		clear: both;
 		display: block;
 		width: 125px;
 		float: left;
@@ -26,10 +27,6 @@
 	
 	input[type=text] {
 		width: 110px;
-	}
-	
-	br {
-		clear: both;
 	}
 	
 	#seed,#shapeSeed {
@@ -65,7 +62,7 @@
 			<div><label for="numberOfPoints">number of points</label><input id="numberOfPoints" type="text" value="1000" /></div>
 			<div><label for="lakeThreshold" title="0 to 1, fraction of water corners for water polygon">lake threshold</label><input id="lakeThreshold" type="text" value="0.3" /></div>
 			<div><label for="lloydIterations">number of lloyd iterations</label><input id="lloydIterations" type="text" value="2" /></div>
-			<div><label for="riverChance" title="0 = no rivers, > 0 = more rivers">river chance</label><input id="riverChance" type="text" value="100" /></div>
+			<div><label for="riverChance" title="0 = no rivers, &gt; 0 = more rivers">river chance</label><input id="riverChance" type="text" value="100" /></div>
 			<div>
 				<label for="view">view</label>
 				<select id="view">

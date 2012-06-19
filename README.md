@@ -9,4 +9,8 @@ Flash dependencies removed.
 
 Make sure you run ``git submodule update --init`` to clone the dependent libraries.
 
-https://github.com/rjanicek/voronoi-map-haxe
+Demo -> http://rjanicek.github.com/voronoi-map-haxe
+
+Specs -> http://rjanicek.github.com/voronoi-map-haxe/specs
+	
+GitHub -> https://github.com/rjanicek/voronoi-map-haxe

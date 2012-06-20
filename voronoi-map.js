@@ -376,6 +376,20 @@ co.janicek.core.array.Array2dCore.foreachY = function(a,f) {
 		if(y != null) f(y);
 	}
 }
+co.janicek.core.array.Array2dCore.foreachXY = function(a,f) {
+	var _g1 = 0, _g = a.length;
+	while(_g1 < _g) {
+		var yIndex = _g1++;
+		if(a[yIndex] != null) {
+			var _g3 = 0, _g2 = a[yIndex].length;
+			while(_g3 < _g2) {
+				var xIndex = _g3++;
+				var value = a[yIndex][xIndex];
+				if(value != null) f(xIndex,yIndex,value);
+			}
+		}
+	}
+}
 co.janicek.core.array.Array2dCore.dimensions = function(array) {
 	var height = array.length;
 	var width = 0;
@@ -425,13 +439,13 @@ co.janicek.core.html.CanvasCore.addNoise = function(pixelData,randomSeed,noiseLe
 	});
 	return pixelData;
 }
-co.janicek.core.html.CanvasCore.addNoiseToCanvas = function(context,width,height,randomSeed,noiseLevel,grayScale,red,green,blue,alpha) {
+co.janicek.core.html.CanvasCore.addNoiseToCanvas = function(context,randomSeed,noiseLevel,grayScale,red,green,blue,alpha) {
 	if(alpha == null) alpha = false;
 	if(blue == null) blue = true;
 	if(green == null) green = true;
 	if(red == null) red = true;
 	if(grayScale == null) grayScale = false;
-	var imageData = context.getImageData(0,0,width,height);
+	var imageData = context.getImageData(0,0,context.canvas.width,context.canvas.height);
 	imageData = co.janicek.core.html.CanvasCore.addNoise(imageData,randomSeed,noiseLevel,grayScale,red,green,blue,alpha);
 	context.putImageData(imageData,0,0);
 }
@@ -451,11 +465,10 @@ co.janicek.core.html.CanvasCore.getImageData = function(image) {
 	var imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 	return imageData;
 }
-co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap = function(imageData,threshold,invert) {
-	if(invert == null) invert = false;
+co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap = function(imageData,threshold) {
 	threshold = co.janicek.core.math.MathCore.clampInt(threshold,0,255);
 	return co.janicek.core.html.CanvasCore.makeBitmap(imageData,function(red,green,blue,alpha) {
-		return invert?co.janicek.core.math.MathCore.averageInt([red,green,blue]) < threshold:co.janicek.core.math.MathCore.averageInt([red,green,blue]) > threshold;
+		return co.janicek.core.math.MathCore.averageInt([red,green,blue]) > threshold;
 	});
 }
 co.janicek.core.html.CanvasCore.makeBitmap = function(imageData,f) {
@@ -466,6 +479,12 @@ co.janicek.core.html.CanvasCore.makeBitmap = function(imageData,f) {
 		return null;
 	});
 	return array;
+}
+co.janicek.core.html.CanvasCore.invertBitmap = function(bitmap) {
+	co.janicek.core.array.Array2dCore.foreachXY(bitmap,function(x,y,value) {
+		co.janicek.core.array.Array2dCore.set(bitmap,x,y,!value);
+	});
+	return bitmap;
 }
 co.janicek.core.html.CanvasCore.prototype = {
 	__class__: co.janicek.core.html.CanvasCore
@@ -2174,7 +2193,7 @@ voronoimap.Main.generate = function() {
 	case "bitmap":
 		co.janicek.core.html.CanvasCore.loadImage(new js.JQuery("#bitmapUrl").val(),function(image) {
 			var imageData = co.janicek.core.html.CanvasCore.getImageData(image);
-			var bitmap = co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap(imageData,127,true);
+			var bitmap = co.janicek.core.html.CanvasCore.invertBitmap(co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap(imageData,127));
 			map.newIsland(voronoimap.IslandShape.makeBitmap(bitmap),1);
 			voronoimap.Main.buildMapAndRender(map);
 		});
@@ -2201,12 +2220,12 @@ voronoimap.Main.getIntegerOrStringSeed = function(s) {
 voronoimap.Main.buildMapAndRender = function(map) {
 	var noisyEdges = new voronoimap.NoisyEdges();
 	var lava = new voronoimap.Lava();
-	map.go(0,1);
-	map.go(1,2);
-	map.go(2,3);
-	map.assignBiomes();
-	map.go(3,6);
-	map.assignBiomes();
+	map.go0PlacePoints();
+	map.go1ImprovePoints();
+	map.go2BuildGraph();
+	map.go3AssignElevations();
+	map.go4AssignMoisture();
+	map.go5DecorateMap();
 	noisyEdges.buildNoisyEdges(map,lava,new de.polygonal.math.PM_PRNG());
 	voronoimap.Main.render(map,noisyEdges,lava);
 }
@@ -2222,7 +2241,7 @@ voronoimap.Main.render = function(map,noisyEdges,lava) {
 		voronoimap.html.CanvasRender.renderEdges(c,voronoimap.html.Style.displayColors,map,noisyEdges,lava);
 		break;
 	}
-	if(new js.JQuery("#addNoise")["is"](":checked")) co.janicek.core.html.CanvasCore.addNoiseToCanvas(c,map.SIZE.width,map.SIZE.height,666,10,true);
+	if(new js.JQuery("#addNoise")["is"](":checked")) co.janicek.core.html.CanvasCore.addNoiseToCanvas(c,666,10,true);
 }
 voronoimap.Main.prototype = {
 	__class__: voronoimap.Main
@@ -2311,55 +2330,43 @@ voronoimap.Map.prototype = {
 		if(this.centers == null) this.centers = new Array();
 		if(this.corners == null) this.corners = new Array();
 	}
-	,go: function(first,last) {
-		var me = this;
-		var stages = [];
-		var timeIt = function(name,fn) {
-			fn();
-		};
-		stages.push(["Place points...",function() {
-			me.reset();
-			me.points = me.generateRandomPoints();
-		}]);
-		stages.push(["Improve points...",function() {
-			me.improveRandomPoints(me.points);
-		}]);
-		stages.push(["Build graph...",function() {
-			var voronoi = new com.nodename.delaunay.Voronoi(me.points,null,new as3.as3types.Rectangle(0,0,me.SIZE.width,me.SIZE.height));
-			me.buildGraph(me.points,voronoi);
-			me.improveCorners();
-			voronoi.dispose();
-			voronoi = null;
-			me.points = null;
-		}]);
-		stages.push(["Assign elevations...",function() {
-			me.assignCornerElevations();
-			me.assignOceanCoastAndLand();
-			me.redistributeElevations(me.landCorners(me.corners));
-			var _g = 0, _g1 = me.corners;
-			while(_g < _g1.length) {
-				var q = _g1[_g];
-				++_g;
-				if(q.ocean || q.coast) q.elevation = 0.0;
-			}
-			me.assignPolygonElevations();
-		}]);
-		stages.push(["Assign moisture...",function() {
-			me.calculateDownslopes();
-			me.calculateWatersheds();
-			me.createRivers(me.RIVER_CHANCE);
-			me.assignCornerMoisture();
-			me.redistributeMoisture(me.landCorners(me.corners));
-			me.assignPolygonMoisture();
-		}]);
-		stages.push(["Decorate map...",function() {
-			me.assignBiomes();
-		}]);
-		var _g = first;
-		while(_g < last) {
-			var i = _g++;
-			timeIt(stages[i][0],stages[i][1]);
+	,go0PlacePoints: function() {
+		this.reset();
+		this.points = this.generateRandomPoints();
+	}
+	,go1ImprovePoints: function() {
+		this.improveRandomPoints(this.points);
+	}
+	,go2BuildGraph: function() {
+		var voronoi = new com.nodename.delaunay.Voronoi(this.points,null,new as3.as3types.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
+		this.buildGraph(this.points,voronoi);
+		this.improveCorners();
+		voronoi.dispose();
+		voronoi = null;
+		this.points = null;
+	}
+	,go3AssignElevations: function() {
+		this.assignCornerElevations();
+		this.assignOceanCoastAndLand();
+		this.redistributeElevations(this.landCorners(this.corners));
+		var _g = 0, _g1 = this.corners;
+		while(_g < _g1.length) {
+			var q = _g1[_g];
+			++_g;
+			if(q.ocean || q.coast) q.elevation = 0.0;
 		}
+		this.assignPolygonElevations();
+	}
+	,go4AssignMoisture: function() {
+		this.calculateDownslopes();
+		this.calculateWatersheds();
+		this.createRivers(this.RIVER_CHANCE);
+		this.assignCornerMoisture();
+		this.redistributeMoisture(this.landCorners(this.corners));
+		this.assignPolygonMoisture();
+	}
+	,go5DecorateMap: function() {
+		this.assignBiomes();
 	}
 	,generateRandomPoints: function() {
 		var p, i, points = new Array();

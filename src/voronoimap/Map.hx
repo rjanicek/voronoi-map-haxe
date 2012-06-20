@@ -110,112 +110,88 @@ class Map {
       //System.gc();
     }
 	
-    public function go(first:Int, last:Int):Void {
-      var stages = [];
-
-		function timeIt(name:String, fn:Void->Void):Void {
-			//Disabled for Haxe, doesn't appear to do anything.
-			//var t:Number =  getTimer();
-			fn();
-		}
-      
-      // Generate the initial random set of points
-      stages.push
-        (["Place points...",
-          function():Void {
-            reset();
-            points = generateRandomPoints();
-          }]);
-
-      stages.push
-        (["Improve points...",
-          function():Void {
-            improveRandomPoints(points);
-          }]);
-
-      
-      // Create a graph structure from the Voronoi edge list. The
-      // methods in the Voronoi object are somewhat inconvenient for
-      // my needs, so I transform that data into the data I actually
-      // need: edges connected to the Delaunay triangles and the
-      // Voronoi polygons, a reverse map from those four points back
-      // to the edge, a map from these four points to the points
-      // they connect to (both along the edge and crosswise).
-      stages.push
-        ( ["Build graph...",
-             function():Void {
-               var voronoi:Voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
-               buildGraph(points, voronoi);
-               improveCorners();
-               voronoi.dispose();
-               voronoi = null;
-               points = null;
-		}]);
-
-      stages.push
-        (["Assign elevations...",
-             function():Void {
-               // Determine the elevations and water at Voronoi corners.
-               assignCornerElevations();
-				
-               // Determine polygon and corner type: ocean, coast, land.
-               assignOceanCoastAndLand();
-
-               // Rescale elevations so that the highest is 1.0, and they're
-               // distributed well. We want lower elevations to be more common
-               // than higher elevations, in proportions approximately matching
-               // concentric rings. That is, the lowest elevation is the
-               // largest ring around the island, and therefore should more
-               // land area than the highest elevation, which is the very
-               // center of a perfectly circular island.
-               redistributeElevations(landCorners(corners));
-
-               // Assign elevations to non-land corners
-               for (q in corners) {
-                   if (q.ocean || q.coast) {
-                     q.elevation = 0.0;
-                   }
-                 }
-               
-               // Polygon elevations are the average of their corners
-               assignPolygonElevations();
-          }]);
-             
-
-      stages.push
-        (["Assign moisture...",
-             function():Void {
-               // Determine downslope paths.
-               calculateDownslopes();
-
-               // Determine watersheds: for every corner, where does it flow
-               // out into the ocean? 
-               calculateWatersheds();
-
-               // Create rivers.
-               createRivers(RIVER_CHANCE);
-
-               // Determine moisture at corners, starting at rivers
-               // and lakes, but not oceans. Then redistribute
-               // moisture to cover the entire range evenly from 0.0
-               // to 1.0. Then assign polygon moisture as the average
-               // of the corner moisture.
-               assignCornerMoisture();
-               redistributeMoisture(landCorners(corners));
-               assignPolygonMoisture();
-             }]);
-
-      stages.push
-        (["Decorate map...",
-             function():Void {
-               assignBiomes();
-             }]);
-      
-      for (i in first...last) {
-          timeIt(stages[i][0], stages[i][1]);
-        }
-    }
+	/**
+	 * Generate the initial random set of points.
+	 */
+	public function go0PlacePoints() : Void {
+		reset();
+		points = generateRandomPoints();
+	}
 	
+	public function go1ImprovePoints() : Void {
+		improveRandomPoints(points);
+	}
+	
+	/**
+	 * Create a graph structure from the Voronoi edge list. The
+     * methods in the Voronoi object are somewhat inconvenient for
+     * my needs, so I transform that data into the data I actually
+     * need: edges connected to the Delaunay triangles and the
+     * Voronoi polygons, a reverse map from those four points back
+     * to the edge, a map from these four points to the points
+     * they connect to (both along the edge and crosswise).
+	 */
+	public function go2BuildGraph() : Void {
+	   var voronoi:Voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
+	   buildGraph(points, voronoi);
+	   improveCorners();
+	   voronoi.dispose();
+	   voronoi = null;
+	   points = null;
+	}
+	
+	public function go3AssignElevations() : Void {
+		// Determine the elevations and water at Voronoi corners.
+		assignCornerElevations();
+
+		// Determine polygon and corner type: ocean, coast, land.
+		assignOceanCoastAndLand();
+
+		// Rescale elevations so that the highest is 1.0, and they're
+		// distributed well. We want lower elevations to be more common
+		// than higher elevations, in proportions approximately matching
+		// concentric rings. That is, the lowest elevation is the
+		// largest ring around the island, and therefore should more
+		// land area than the highest elevation, which is the very
+		// center of a perfectly circular island.
+		redistributeElevations(landCorners(corners));
+
+		// Assign elevations to non-land corners
+		for (q in corners) {
+			if (q.ocean || q.coast) {
+				q.elevation = 0.0;
+			}
+		}
+
+		// Polygon elevations are the average of their corners
+		assignPolygonElevations();
+	}
+	
+	public function go4AssignMoisture() : Void {
+		// Determine downslope paths.
+		calculateDownslopes();
+
+		// Determine watersheds: for every corner, where does it flow
+		// out into the ocean? 
+		calculateWatersheds();
+
+		// Create rivers.
+		createRivers(RIVER_CHANCE);
+
+		// Determine moisture at corners, starting at rivers
+		// and lakes, but not oceans. Then redistribute
+		// moisture to cover the entire range evenly from 0.0
+		// to 1.0. Then assign polygon moisture as the average
+		// of the corner moisture.
+		assignCornerMoisture();
+		redistributeMoisture(landCorners(corners));
+		assignPolygonMoisture();		
+	}
+	
+	public function go5DecorateMap() : Void {
+		assignBiomes();
+	}
+
     // Generate random points and assign them to be on the island or
     // in the water. Some water points are inland lakes; others are
     // ocean. We'll determine ocean later by looking at what's

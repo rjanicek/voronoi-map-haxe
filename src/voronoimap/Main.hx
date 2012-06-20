@@ -12,7 +12,9 @@ import js.Lib;
 import voronoimap.html.CanvasRender;
 import voronoimap.html.Style;
 
+using Math;
 using Std;
+using co.janicek.core.html.CanvasCore;
 using co.janicek.core.StringCore;
 
 class Html {
@@ -61,6 +63,7 @@ class Main {
 			new JQuery([Html.S_islandFactor, Html.S_oceanRatio, Html.S_shapeSeed, Html.S_bitmapUrl].toString()).parent().hide();
 			switch(new JQuery(Html.S_islandShape).val()) {
 				case "bitmap": new JQuery(Html.S_bitmapUrl).parent().show();
+				case "noise": new JQuery(Html.S_shapeSeed).parent().show();
 				case "perlin": new JQuery([Html.S_oceanRatio, Html.S_shapeSeed].toString()).parent().show();
 				case "radial": new JQuery([Html.S_islandFactor, Html.S_shapeSeed].toString()).parent().show();
 			}
@@ -122,11 +125,12 @@ class Main {
 			case "bitmap" :
 				CanvasCore.loadImage(new JQuery(Html.S_bitmapUrl).val(), function(image) {
 					var imageData = CanvasCore.getImageData(image);
-					var bitmap = CanvasCore.makeAverageThresholdBitmap(imageData, 127, true);
+					var bitmap = CanvasCore.makeAverageThresholdBitmap(imageData, 127).invertBitmap();
 					map.newIsland(IslandShape.makeBitmap(bitmap), 1);
 					buildMapAndRender(map);
 				});
 			case "blob" : map.newIsland(IslandShape.makeBlob(), seed);
+			case "noise" : map.newIsland(IslandShape.makeNoise(shapeSeed), seed);
 			case "perlin" : map.newIsland(IslandShape.makePerlin(shapeSeed, new JQuery(Html.S_oceanRatio).val().parseFloat()), seed);
 			case "radial" :	map.newIsland(IslandShape.makeRadial(shapeSeed, new JQuery(Html.S_islandFactor).val().parseFloat()), seed);
 			case "square" :	map.newIsland(IslandShape.makeSquare(), seed);
@@ -142,19 +146,19 @@ class Main {
 			return s.parseInt();
 		}
 		
-		return RandomCore.stringToSeed(s);
+		return RandomCore.stringToSeed(s).abs().int();
 	}
 	
 	private static function buildMapAndRender(map:Map) {
 		var noisyEdges = new NoisyEdges();
 		var lava = new Lava();
 		
-		map.go(0, 1);
-		map.go(1, 2);
-		map.go(2, 3);
-		map.assignBiomes();
-		map.go(3, 6);
-		map.assignBiomes();
+		map.go0PlacePoints();
+		map.go1ImprovePoints();
+		map.go2BuildGraph();
+		map.go3AssignElevations();
+		map.go4AssignMoisture();
+		map.go5DecorateMap();
 		noisyEdges.buildNoisyEdges(map, lava, new PM_PRNG());
 		render(map, noisyEdges, lava);
 	}	
@@ -172,7 +176,7 @@ class Main {
 		}
 		
 		if (new JQuery(Html.S_addNoise).is(":checked")) {
-			CanvasCore.addNoiseToCanvas(c, map.SIZE.width, map.SIZE.height, 666, 10, true);
+			CanvasCore.addNoiseToCanvas(c, 666, 10, true);
 		}		
 		
 	}

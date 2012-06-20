@@ -24,24 +24,25 @@ class MapSpec {
 			map.newIsland(IslandShape.makeRadial(1), 1);
 
 			J.it("should place points", function() {
-				map.go(0, 1);
+				map.go0PlacePoints();
 				J.expect(map.points.length).toBe(map.NUM_POINTS);
 			});
 			
 			J.it("should improve points", function() {
-				map.go(1, 2);
+				map.go1ImprovePoints();
 				J.expect(map.points.length).toBe(map.NUM_POINTS);
 			});
 
 			J.it("should build a graph", function() {
-				map.go(2, 3);
+				map.go2BuildGraph();
 				map.assignBiomes();
 				J.expect(true).toBeTruthy();
 			});
 
 			J.it("should add features", function() {
-				map.go(3, 6);
-				map.assignBiomes();
+				map.go3AssignElevations();
+				map.go4AssignMoisture();
+				map.go5DecorateMap();
 				J.expect(true).toBeTruthy();
 			});
 			

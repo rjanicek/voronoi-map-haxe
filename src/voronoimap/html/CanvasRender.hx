@@ -5,7 +5,7 @@ import as3.ac3core.Vector3D;
 import as3.as3types.TypeDefs;
 import co.janicek.core.array.Array2dCore;
 import co.janicek.core.html.CanvasCore;
-import co.janicek.core.html.ColorPure;
+import co.janicek.core.html.ColorCore;
 import co.janicek.core.math.PerlinNoise;
 import co.janicek.core.math.RandomCore;
 import haxe.Timer;
@@ -64,21 +64,11 @@ typedef ElevationGradientColors = {
 
 class CanvasRender {
 	
-	//public static function render(c:CanvasRenderingContext2D, map:Map, noisyEdges:NoisyEdges, lava:Lava, displayColors:DisplayColors):Void {
-		//graphicsReset(c, map.SIZE.width.int(), map.SIZE.height.int(), displayColors);
-		
-		//renderDebugPolygons(c, map, displayColors);
-		
-		//renderPolygons(c, displayColors, null, colorWithSlope, map, noisyEdges);
-		//renderEdges(c, displayColors, map, noisyEdges, lava);
-		//CanvasCore.addNoiseToCanvas(c, map.SIZE.width,map.SIZE.height, 666, 10, true);
-	//}
-	
 	public static function graphicsReset(c:CanvasRenderingContext2D, mapWidth:Int, mapHeight:Int, displayColors:DisplayColors):Void {
 		c.clearRect(0, 0, 2000, 2000);
 		c.fillStyle = "#bbbbaa";
 		c.fillRect(0, 0, 2000, 2000);
-		c.fillStyle = ColorPure.toHtmlColor(displayColors.OCEAN);
+		c.fillStyle = ColorCore.intToHexColor(displayColors.OCEAN);
 		c.fillRect(0, 0, Std.int(mapWidth), Std.int(mapHeight));
     }
 
@@ -106,12 +96,12 @@ class CanvasRender {
 			return color;
 		}
 
-		if (q != null && p.water == q.water) color = ColorPure.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
-		var colorLow:Int = ColorPure.interpolateColor(color, 0x333333, 0.7);
-		var colorHigh:Int = ColorPure.interpolateColor(color, 0xffffff, 0.3);
+		if (q != null && p.water == q.water) color = ColorCore.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
+		var colorLow:Int = ColorCore.interpolateColor(color, 0x333333, 0.7);
+		var colorHigh:Int = ColorCore.interpolateColor(color, 0xffffff, 0.3);
 		var light:Number = calculateLighting(p, r, s);
-		if (light < 0.5) return ColorPure.interpolateColor(colorLow, color, light*2);
-		else return ColorPure.interpolateColor(color, colorHigh, light*2-1);
+		if (light < 0.5) return ColorCore.interpolateColor(colorLow, color, light*2);
+		else return ColorCore.interpolateColor(color, colorHigh, light*2-1);
     }
 	
 	
@@ -155,7 +145,7 @@ class CanvasRender {
 				}
 			}
 			context.closePath();
-			context.fillStyle = ColorPure.toHtmlColor(ColorPure.interpolateColor(color, 0xdddddd, 0.2));
+			context.fillStyle = ColorCore.intToHexColor(ColorCore.interpolateColor(color, 0xdddddd, 0.2));
 			context.fill();
 
 			//Draw borders
@@ -165,7 +155,7 @@ class CanvasRender {
 					context.moveTo(edge.v0.point.x, edge.v0.point.y);
 					if (edge.river > 0) {
 						context.lineWidth = 1;
-						context.strokeStyle = ColorPure.toHtmlColor(displayColors.RIVER);
+						context.strokeStyle = ColorCore.intToHexColor(displayColors.RIVER);
 					} else {
 						context.lineWidth = 0.1;
 						context.strokeStyle = "#000000"; 
@@ -198,7 +188,7 @@ class CanvasRender {
 
       // My Voronoi polygon rendering doesn't handle the boundary
       // polygons, so I just fill everything with ocean first.
-      graphics.fillStyle = ColorPure.toHtmlColor(colors.OCEAN);
+      graphics.fillStyle = ColorCore.intToHexColor(colors.OCEAN);
       graphics.fillRect(0, 0, Std.int(map.SIZE.width), Std.int(map.SIZE.height));
       
       for (p in map.centers) {
@@ -258,7 +248,7 @@ class CanvasRender {
                    [colors.GRADIENT_LOW, colors.GRADIENT_HIGH], drawPath1);
               } 
 			  else {
-					graphics.fillStyle = ColorPure.toHtmlColor(color);
+					graphics.fillStyle = ColorCore.intToHexColor(color);
 					graphics.strokeStyle = graphics.fillStyle;
 					graphics.beginPath();
 					drawPath0();
@@ -294,22 +284,22 @@ class CanvasRender {
 				if (p.ocean != r.ocean) {
 					// One side is ocean and the other side is land -- coastline
 					graphics.lineWidth = 2;
-					graphics.strokeStyle = ColorPure.toHtmlColor(colors.COAST);
+					graphics.strokeStyle = ColorCore.intToHexColor(colors.COAST);
 				} else if ((p.water.intFromBoolean() > 0) != (r.water.intFromBoolean() > 0) && p.biome != 'ICE' && r.biome != 'ICE') {
 					// Lake boundary
 					graphics.lineWidth = 1;
-					graphics.strokeStyle = ColorPure.toHtmlColor(colors.LAKESHORE);
+					graphics.strokeStyle = ColorCore.intToHexColor(colors.LAKESHORE);
 				} else if (p.water || r.water) {
 					// Lake interior – we don't want to draw the rivers here
 					continue;
 				} else if (lava.lava[edge.index]) {
 					// Lava flow
 					graphics.lineWidth = 1;
-					graphics.strokeStyle = ColorPure.toHtmlColor(colors.LAVA);
+					graphics.strokeStyle = ColorCore.intToHexColor(colors.LAVA);
 				} else if (edge.river > 0) {
 					// River edge
 					graphics.lineWidth = Math.sqrt(edge.river);
-					graphics.strokeStyle = ColorPure.toHtmlColor(colors.RIVER);
+					graphics.strokeStyle = ColorCore.intToHexColor(colors.RIVER);
 				} else {
 					// No edge
 					continue;
@@ -360,15 +350,15 @@ class CanvasRender {
         // be trusted.  NOTE: only works for 1, 2, 3 colors in the array
         var color:UInt = colors[0];
         if (colors.length == 2) {
-          color = ColorPure.interpolateColor(colors[0], colors[1], V.z);
+          color = ColorCore.interpolateColor(colors[0], colors[1], V.z);
         } else if (colors.length == 3) {
           if (V.z < 0.5) {
-            color = ColorPure.interpolateColor(colors[0], colors[1], V.z*2);
+            color = ColorCore.interpolateColor(colors[0], colors[1], V.z*2);
           } else {
-            color = ColorPure.interpolateColor(colors[1], colors[2], V.z*2-1);
+            color = ColorCore.interpolateColor(colors[1], colors[2], V.z*2-1);
           }
         }
-		graphics.fillStyle = ColorPure.toHtmlColor(color); //graphics.beginFill(color);
+		graphics.fillStyle = ColorCore.intToHexColor(color); //graphics.beginFill(color);
       } else {
         // The gradient box is weird to set up, so we let Flash set up
         // a basic matrix and then we alter it:

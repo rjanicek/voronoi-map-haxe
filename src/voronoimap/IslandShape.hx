@@ -7,6 +7,7 @@ import de.polygonal.math.PM_PRNG;
 
 using as3.ac3core.PointCore;
 using co.janicek.core.array.Array2dCore;
+using co.janicek.core.math.RandomCore;
 using Std;
 
 /**
@@ -26,30 +27,30 @@ class IslandShape {
    * @param	seed
    * @param	islandFactor = 1.0 means no small islands; 2.0 leads to a lot
    */
-  static public function makeRadial(seed:Int, islandFactor = 1.07):Point->Boolean {
-    var islandRandom:PM_PRNG = new PM_PRNG();
-    islandRandom.seed = seed;
-    var bumps:Int = islandRandom.nextIntRange(1, 6);
-    var startAngle:Number = islandRandom.nextDoubleRange(0, 2 * Math.PI);
-    var dipAngle:Number = islandRandom.nextDoubleRange(0, 2 * Math.PI);
-    var dipWidth:Number = islandRandom.nextDoubleRange(0.2, 0.7);
+	static public function makeRadial(seed:Int, islandFactor = 1.07):Point->Boolean {
+		var islandRandom:PM_PRNG = new PM_PRNG();
+		islandRandom.seed = seed;
+		var bumps:Int = islandRandom.nextIntRange(1, 6);
+		var startAngle:Number = islandRandom.nextDoubleRange(0, 2 * Math.PI);
+		var dipAngle:Number = islandRandom.nextDoubleRange(0, 2 * Math.PI);
+		var dipWidth:Number = islandRandom.nextDoubleRange(0.2, 0.7);
     
-    function inside(q:Point):Boolean {
-      var angle:Number = Math.atan2(q.y, q.x);
-      var length:Number = 0.5 * (Math.max(Math.abs(q.x), Math.abs(q.y)) + q.distanceFromOrigin());
+		function inside(q:Point):Boolean {
+			var angle:Number = Math.atan2(q.y, q.x);
+			var length:Number = 0.5 * (Math.max(Math.abs(q.x), Math.abs(q.y)) + q.distanceFromOrigin());
 
-      var r1:Number = 0.5 + 0.40 * Math.sin(startAngle + bumps * angle + Math.cos((bumps + 3) * angle));
-      var r2:Number = 0.7 - 0.20 * Math.sin(startAngle + bumps * angle - Math.sin((bumps + 2) * angle));
-      if (Math.abs(angle - dipAngle) < dipWidth
-          || Math.abs(angle - dipAngle + 2*Math.PI) < dipWidth
-          || Math.abs(angle - dipAngle - 2*Math.PI) < dipWidth) {
-        r1 = r2 = 0.2;
-      }
-      return  (length < r1 || (length > r1 * islandFactor && length < r2));
-    }
+			var r1:Number = 0.5 + 0.40 * Math.sin(startAngle + bumps * angle + Math.cos((bumps + 3) * angle));
+			var r2:Number = 0.7 - 0.20 * Math.sin(startAngle + bumps * angle - Math.sin((bumps + 2) * angle));
+			if (Math.abs(angle - dipAngle) < dipWidth
+				|| Math.abs(angle - dipAngle + 2*Math.PI) < dipWidth
+				|| Math.abs(angle - dipAngle - 2*Math.PI) < dipWidth) {
+				r1 = r2 = 0.2;
+			}
+			return  (length < r1 || (length > r1 * islandFactor && length < r2));
+		}
 
-    return inside;
-  }
+		return inside;
+	}
 
 	/**
 	 * The Perlin-based island combines perlin noise with the radius.
@@ -60,12 +61,12 @@ class IslandShape {
 		var landRatioMinimum = 0.1;
 		var landRatioMaximum = 0.5;
 		oceanRatio = ((landRatioMaximum - landRatioMinimum) * oceanRatio) + landRatioMinimum;  //min: 0.1 max: 0.5
-		var perlin = PerlinNoise.makePerlinNoise(256, 256, 1.0, 1.0, 1.0, seed, 8); // var perlin:BitmapData = new BitmapData(256, 256);
-		//perlin.perlinNoise(64, 64, 8, seed, false, true);
+		var perlin = PerlinNoise.makePerlinNoise(256, 256, 1.0, 1.0, 1.0, seed, 8);
+		//perlin.perlinNoise(64, 64, 8, seed, false, true); //mapgen2
 
 		return function (q:Point):Boolean {
-			var c:Number = (Array2dCore.get(perlin, Std.int((q.x+1)*128), Std.int((q.y+1)*128)) & 0xff) / 255.0;
-			//var c:Number = (perlin.getPixel(Std.int((q.x+1)*128), Std.int((q.y+1)*128)) & 0xff) / 255.0;
+			var c:Number = (Array2dCore.get(perlin, Std.int((q.x + 1) * 128), Std.int((q.y + 1) * 128)) & 0xff) / 255.0;
+			//var c:Number = (perlin.getPixel(Std.int((q.x+1)*128), Std.int((q.y+1)*128)) & 0xff) / 255.0; //mapgen2
 			return c > (oceanRatio + oceanRatio * q.distanceFromOrigin() * q.distanceFromOrigin());
 		};
 	}
@@ -102,5 +103,15 @@ class IslandShape {
 			return bitmap.get(x.int(), y.int());
 		};
 	}
+	
+	/**
+	 * Make island from simple noise.
+	 */
+	static public function makeNoise( seed : Int ) : Point->Boolean {
+		return function (q:Point):Boolean {
+			return (seed = seed.nextParkMiller()).toBool();
+		};
+	}
+
 
 }

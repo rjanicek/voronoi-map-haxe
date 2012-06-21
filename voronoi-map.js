@@ -489,9 +489,9 @@ co.janicek.core.html.CanvasCore.invertBitmap = function(bitmap) {
 co.janicek.core.html.CanvasCore.prototype = {
 	__class__: co.janicek.core.html.CanvasCore
 }
-co.janicek.core.html.ColorPure = $hxClasses["co.janicek.core.html.ColorPure"] = function() { }
-co.janicek.core.html.ColorPure.__name__ = ["co","janicek","core","html","ColorPure"];
-co.janicek.core.html.ColorPure.interpolateColor = function(color0,color1,f) {
+co.janicek.core.html.ColorCore = $hxClasses["co.janicek.core.html.ColorCore"] = function() { }
+co.janicek.core.html.ColorCore.__name__ = ["co","janicek","core","html","ColorCore"];
+co.janicek.core.html.ColorCore.interpolateColor = function(color0,color1,f) {
 	var r = (1 - f) * (color0 >> 16) + f * (color1 >> 16) | 0;
 	var g = (1 - f) * (color0 >> 8 & 255) + f * (color1 >> 8 & 255) | 0;
 	var b = (1 - f) * (color0 & 255) + f * (color1 & 255) | 0;
@@ -500,11 +500,11 @@ co.janicek.core.html.ColorPure.interpolateColor = function(color0,color1,f) {
 	if(b > 255) b = 255;
 	return r << 16 | g << 8 | b;
 }
-co.janicek.core.html.ColorPure.toHtmlColor = function(color) {
-	return "#" + StringTools.hex(color);
+co.janicek.core.html.ColorCore.intToHexColor = function(color) {
+	return "#" + StringTools.hex(color,6);
 }
-co.janicek.core.html.ColorPure.prototype = {
-	__class__: co.janicek.core.html.ColorPure
+co.janicek.core.html.ColorCore.prototype = {
+	__class__: co.janicek.core.html.ColorCore
 }
 if(!co.janicek.core.math) co.janicek.core.math = {}
 co.janicek.core.math.HashCore = $hxClasses["co.janicek.core.math.HashCore"] = function() { }
@@ -644,6 +644,9 @@ co.janicek.core.math.RandomCore.nextParkMiller = function(seed) {
 }
 co.janicek.core.math.RandomCore.toFloat = function(seed) {
 	return seed / 2147483647.0;
+}
+co.janicek.core.math.RandomCore.toBool = function(seed) {
+	return seed / 2147483647.0 > 0.5;
 }
 co.janicek.core.math.RandomCore.toIntRange = function(seed,min,max) {
 	return Math.round(min - 0.4999 + (max + 0.4999 - (min - 0.4999)) * (seed / 2147483647.0));
@@ -2104,6 +2107,11 @@ voronoimap.IslandShape.makeBitmap = function(bitmap) {
 		return co.janicek.core.array.Array2dCore.get(bitmap,x | 0,y | 0);
 	};
 }
+voronoimap.IslandShape.makeNoise = function(seed) {
+	return function(q) {
+		return (seed = seed * 16807.0 % 2147483647.0) / 2147483647.0 > 0.5;
+	};
+}
 voronoimap.IslandShape.prototype = {
 	__class__: voronoimap.IslandShape
 }
@@ -2139,6 +2147,9 @@ voronoimap.Main.initializeUi = function() {
 		switch(new js.JQuery("#islandShape").val()) {
 		case "bitmap":
 			new js.JQuery("#bitmapUrl").parent().show();
+			break;
+		case "noise":
+			new js.JQuery("#shapeSeed").parent().show();
 			break;
 		case "perlin":
 			new js.JQuery(["#oceanRatio","#shapeSeed"].toString()).parent().show();
@@ -2201,6 +2212,9 @@ voronoimap.Main.generate = function() {
 	case "blob":
 		map.newIsland(voronoimap.IslandShape.makeBlob(),seed);
 		break;
+	case "noise":
+		map.newIsland(voronoimap.IslandShape.makeNoise(shapeSeed),seed);
+		break;
 	case "perlin":
 		map.newIsland(voronoimap.IslandShape.makePerlin(shapeSeed,Std.parseFloat(new js.JQuery("#oceanRatio").val())),seed);
 		break;
@@ -2215,7 +2229,7 @@ voronoimap.Main.generate = function() {
 }
 voronoimap.Main.getIntegerOrStringSeed = function(s) {
 	if(co.janicek.core.StringCore.isInteger(s)) return Std.parseInt(s);
-	return co.janicek.core.math.RandomCore.stringToSeed(s);
+	return Math.abs(co.janicek.core.math.RandomCore.stringToSeed(s)) | 0;
 }
 voronoimap.Main.buildMapAndRender = function(map) {
 	var noisyEdges = new voronoimap.NoisyEdges();
@@ -2978,7 +2992,7 @@ voronoimap.html.CanvasRender.graphicsReset = function(c,mapWidth,mapHeight,displ
 	c.clearRect(0,0,2000,2000);
 	c.fillStyle = "#bbbbaa";
 	c.fillRect(0,0,2000,2000);
-	c.fillStyle = co.janicek.core.html.ColorPure.toHtmlColor(displayColors.OCEAN);
+	c.fillStyle = co.janicek.core.html.ColorCore.intToHexColor(displayColors.OCEAN);
 	c.fillRect(0,0,mapWidth | 0,mapHeight | 0);
 }
 voronoimap.html.CanvasRender.calculateLighting = function(p,r,s) {
@@ -3001,11 +3015,11 @@ voronoimap.html.CanvasRender.colorWithSlope = function(color,p,q,edge,displayCol
 	var r = edge.v0;
 	var s = edge.v1;
 	if(r == null || s == null) return displayColors.OCEAN; else if(p.water) return color;
-	if(q != null && p.water == q.water) color = co.janicek.core.html.ColorPure.interpolateColor(color,Reflect.field(displayColors,q.biome),0.4);
-	var colorLow = co.janicek.core.html.ColorPure.interpolateColor(color,3355443,0.7);
-	var colorHigh = co.janicek.core.html.ColorPure.interpolateColor(color,16777215,0.3);
+	if(q != null && p.water == q.water) color = co.janicek.core.html.ColorCore.interpolateColor(color,Reflect.field(displayColors,q.biome),0.4);
+	var colorLow = co.janicek.core.html.ColorCore.interpolateColor(color,3355443,0.7);
+	var colorHigh = co.janicek.core.html.ColorCore.interpolateColor(color,16777215,0.3);
 	var light = voronoimap.html.CanvasRender.calculateLighting(p,r,s);
-	if(light < 0.5) return co.janicek.core.html.ColorPure.interpolateColor(colorLow,color,light * 2); else return co.janicek.core.html.ColorPure.interpolateColor(color,colorHigh,light * 2 - 1);
+	if(light < 0.5) return co.janicek.core.html.ColorCore.interpolateColor(colorLow,color,light * 2); else return co.janicek.core.html.ColorCore.interpolateColor(color,colorHigh,light * 2 - 1);
 }
 voronoimap.html.CanvasRender.renderDebugPolygons = function(context,map,displayColors) {
 	var p, q, edge, point, color;
@@ -3042,7 +3056,7 @@ voronoimap.html.CanvasRender.renderDebugPolygons = function(context,map,displayC
 			}
 		}
 		context.closePath();
-		context.fillStyle = co.janicek.core.html.ColorPure.toHtmlColor(co.janicek.core.html.ColorPure.interpolateColor(color,14540253,0.2));
+		context.fillStyle = co.janicek.core.html.ColorCore.intToHexColor(co.janicek.core.html.ColorCore.interpolateColor(color,14540253,0.2));
 		context.fill();
 		var _g2 = 0, _g3 = p1.borders;
 		while(_g2 < _g3.length) {
@@ -3053,7 +3067,7 @@ voronoimap.html.CanvasRender.renderDebugPolygons = function(context,map,displayC
 				context.moveTo(edge1.v0.point.x,edge1.v0.point.y);
 				if(edge1.river > 0) {
 					context.lineWidth = 1;
-					context.strokeStyle = co.janicek.core.html.ColorPure.toHtmlColor(displayColors.RIVER);
+					context.strokeStyle = co.janicek.core.html.ColorCore.intToHexColor(displayColors.RIVER);
 				} else {
 					context.lineWidth = 0.1;
 					context.strokeStyle = "#000000";
@@ -3081,7 +3095,7 @@ voronoimap.html.CanvasRender.renderDebugPolygons = function(context,map,displayC
 }
 voronoimap.html.CanvasRender.renderPolygons = function(graphics,colors,gradientFillProperty,colorOverrideFunction,map,noisyEdges) {
 	var p, r;
-	graphics.fillStyle = co.janicek.core.html.ColorPure.toHtmlColor(colors.OCEAN);
+	graphics.fillStyle = co.janicek.core.html.ColorCore.intToHexColor(colors.OCEAN);
 	graphics.fillRect(0,0,map.SIZE.width | 0,map.SIZE.height | 0);
 	var _g = 0, _g1 = map.centers;
 	while(_g < _g1.length) {
@@ -3121,7 +3135,7 @@ voronoimap.html.CanvasRender.renderPolygons = function(graphics,colors,gradientF
 				voronoimap.html.CanvasRender.drawGradientTriangle(graphics,new as3.ac3core.Vector3D(p1[0].point.x,p1[0].point.y,Reflect.field(p1[0],gradientFillProperty)),new as3.ac3core.Vector3D(corner0.point.x,corner0.point.y,Reflect.field(corner0,gradientFillProperty)),new as3.ac3core.Vector3D(midpoint.x,midpoint.y,midpointAttr),[colors.GRADIENT_LOW,colors.GRADIENT_HIGH],drawPath0);
 				voronoimap.html.CanvasRender.drawGradientTriangle(graphics,new as3.ac3core.Vector3D(p1[0].point.x,p1[0].point.y,Reflect.field(p1[0],gradientFillProperty)),new as3.ac3core.Vector3D(midpoint.x,midpoint.y,midpointAttr),new as3.ac3core.Vector3D(corner1.point.x,corner1.point.y,Reflect.field(corner1,gradientFillProperty)),[colors.GRADIENT_LOW,colors.GRADIENT_HIGH],drawPath1);
 			} else {
-				graphics.fillStyle = co.janicek.core.html.ColorPure.toHtmlColor(color);
+				graphics.fillStyle = co.janicek.core.html.ColorCore.intToHexColor(color);
 				graphics.strokeStyle = graphics.fillStyle;
 				graphics.beginPath();
 				drawPath0();
@@ -3154,16 +3168,16 @@ voronoimap.html.CanvasRender.renderEdges = function(graphics,colors,map,noisyEdg
 			if(noisyEdges.path0[edge.index] == null || noisyEdges.path1[edge.index] == null) continue;
 			if(p1.ocean != r1.ocean) {
 				graphics.lineWidth = 2;
-				graphics.strokeStyle = co.janicek.core.html.ColorPure.toHtmlColor(colors.COAST);
+				graphics.strokeStyle = co.janicek.core.html.ColorCore.intToHexColor(colors.COAST);
 			} else if((p1.water?1:0) > 0 != (r1.water?1:0) > 0 && p1.biome != "ICE" && r1.biome != "ICE") {
 				graphics.lineWidth = 1;
-				graphics.strokeStyle = co.janicek.core.html.ColorPure.toHtmlColor(colors.LAKESHORE);
+				graphics.strokeStyle = co.janicek.core.html.ColorCore.intToHexColor(colors.LAKESHORE);
 			} else if(p1.water || r1.water) continue; else if(lava.lava[edge.index]) {
 				graphics.lineWidth = 1;
-				graphics.strokeStyle = co.janicek.core.html.ColorPure.toHtmlColor(colors.LAVA);
+				graphics.strokeStyle = co.janicek.core.html.ColorCore.intToHexColor(colors.LAVA);
 			} else if(edge.river > 0) {
 				graphics.lineWidth = Math.sqrt(edge.river);
-				graphics.strokeStyle = co.janicek.core.html.ColorPure.toHtmlColor(colors.RIVER);
+				graphics.strokeStyle = co.janicek.core.html.ColorCore.intToHexColor(colors.RIVER);
 			} else continue;
 			graphics.beginPath();
 			graphics.moveTo(noisyEdges.path0[edge.index][0].x,noisyEdges.path0[edge.index][0].y);
@@ -3190,10 +3204,10 @@ voronoimap.html.CanvasRender.drawGradientTriangle = function(graphics,v1,v2,v3,c
 	var C = new as3.ac3core.Vector3D(V.x - G.x * ((V.z - 0.5) / Math.abs(as3.ac3core.Vector3D.distance(G,new as3.ac3core.Vector3D())) / Math.abs(as3.ac3core.Vector3D.distance(G,new as3.ac3core.Vector3D()))),V.y - G.y * ((V.z - 0.5) / Math.abs(as3.ac3core.Vector3D.distance(G,new as3.ac3core.Vector3D())) / Math.abs(as3.ac3core.Vector3D.distance(G,new as3.ac3core.Vector3D()))));
 	if(Math.abs(as3.ac3core.Vector3D.distance(G,new as3.ac3core.Vector3D())) < 1e-6) {
 		var color = colors[0];
-		if(colors.length == 2) color = co.janicek.core.html.ColorPure.interpolateColor(colors[0],colors[1],V.z); else if(colors.length == 3) {
-			if(V.z < 0.5) color = co.janicek.core.html.ColorPure.interpolateColor(colors[0],colors[1],V.z * 2); else color = co.janicek.core.html.ColorPure.interpolateColor(colors[1],colors[2],V.z * 2 - 1);
+		if(colors.length == 2) color = co.janicek.core.html.ColorCore.interpolateColor(colors[0],colors[1],V.z); else if(colors.length == 3) {
+			if(V.z < 0.5) color = co.janicek.core.html.ColorCore.interpolateColor(colors[0],colors[1],V.z * 2); else color = co.janicek.core.html.ColorCore.interpolateColor(colors[1],colors[2],V.z * 2 - 1);
 		}
-		graphics.fillStyle = co.janicek.core.html.ColorPure.toHtmlColor(color);
+		graphics.fillStyle = co.janicek.core.html.ColorCore.intToHexColor(color);
 	} else {
 		m.createGradientBox(1,1,0,0,0);
 		m.translate(-0.5,-0.5);

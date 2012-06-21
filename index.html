@@ -11,6 +11,7 @@
 		position:absolute;
 		top:10px;
 		left:10px;
+		padding-top:10px;
 		font-size: 11px; font-family: Monaco, "Lucida Console", monospace; line-height: 14px; color: #333333;
 		background:#C38EC7;
 		-moz-border-radius:5px;  
@@ -41,13 +42,14 @@
 			<div style="font-size:15px;">voronoi-map-haxe</div>
 			<br/>
 			<a href="https://github.com/rjanicek/voronoi-map-haxe">source code on GitHub</a>
-			<hr/>
+			<br/><br/>
 			<div><label for="seed" title="integer or text">seed</label><input id="seed" type="text" value="haxe!" /><button id="random">random</button></div>
 			<div>
 				<label for="islandShape">island shape</label>
 				<select id="islandShape">
 					<option>bitmap</option>
 					<option>blob</option>
+					<option>noise</option>
 					<option selected>perlin</option>
 					<option>radial</option>
 					<option>square</option>

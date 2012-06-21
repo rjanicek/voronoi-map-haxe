@@ -26,7 +26,7 @@
 
 // @r587
 
-package as3.ac3core;
+package as3;
 
 class Vector3D {
 	inline public var length(getLength,null):Float;

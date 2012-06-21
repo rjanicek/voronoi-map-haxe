@@ -1,4 +1,4 @@
-package as3.as3types;
+package as3;
 
 typedef BitmapData = Array<Array<UInt>>;
 typedef Boolean = Bool;

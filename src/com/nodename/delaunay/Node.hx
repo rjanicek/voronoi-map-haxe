@@ -1,6 +1,6 @@
 package com.nodename.delaunay;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class Node {
 	public static var pool:Vector<Node> = new Vector<Node>();

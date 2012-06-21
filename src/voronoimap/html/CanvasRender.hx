@@ -1,8 +1,8 @@
 package voronoimap.html;
 
-import as3.ac3core.Matrix;
-import as3.ac3core.Vector3D;
-import as3.as3types.TypeDefs;
+import as3.Matrix;
+import as3.Vector3D;
+import as3.TypeDefs;
 import co.janicek.core.array.Array2dCore;
 import co.janicek.core.html.CanvasCore;
 import co.janicek.core.html.ColorCore;
@@ -20,7 +20,7 @@ import voronoimap.Lava;
 import voronoimap.Map;
 import voronoimap.NoisyEdges;
 
-using as3.ac3core.ConversionCore;
+using as3.ConversionCore;
 using co.janicek.core.array.Array2dCore;
 using Lambda;
 using Std;

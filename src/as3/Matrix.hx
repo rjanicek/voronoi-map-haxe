@@ -24,8 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package as3.ac3core;
-import as3.as3types.TypeDefs;
+package as3;
+import as3.TypeDefs;
 
 
 /*

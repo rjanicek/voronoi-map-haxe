@@ -1,9 +1,9 @@
 package voronoimap;
 
-import as3.ac3core.ConversionCore;
-import as3.ac3core.PointCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.ConversionCore;
+import as3.PointCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import com.nodename.delaunay.Voronoi;
 import com.nodename.geom.LineSegment;
 import de.polygonal.math.PM_PRNG;
@@ -13,8 +13,8 @@ import voronoimap.graph.Corner;
 import voronoimap.graph.Edge;
 
 using Lambda;
-using as3.ac3core.ConversionCore;
-using as3.ac3core.PointCore;
+using as3.ConversionCore;
+using as3.PointCore;
 
 class Map {
 

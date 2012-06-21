@@ -1,14 +1,14 @@
 package specs;
 
-import as3.ac3core.NumberCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.NumberCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import de.polygonal.math.PM_PRNG;
 import jasmine.J;
 
 using Lambda;
 using Std;
-using as3.ac3core.PointCore;
+using as3.PointCore;
 
 class PrngSpec {
 

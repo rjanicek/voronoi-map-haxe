@@ -1,6 +1,6 @@
-package as3.ac3core;
+package as3;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class ConversionCore {
 

@@ -1,7 +1,7 @@
 package com.nodename.delaunay;
 
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.Rectangle;
+import as3.TypeDefs;
 import com.nodename.delaunay.EdgeReorderer;
 import com.nodename.geom.Circle;
 import com.nodename.geom.LineSegment;
@@ -9,7 +9,7 @@ import de.polygonal.math.PM_PRNG;
 
 using Lambda;
 using Std;
-using as3.ac3core.PointCore;
+using as3.PointCore;
 
 class Voronoi {
 

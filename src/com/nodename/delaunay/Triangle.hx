@@ -1,6 +1,6 @@
 package com.nodename.delaunay;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class Triangle {
 	private var _sites:Vector<Site>;

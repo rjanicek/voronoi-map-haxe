@@ -1,11 +1,11 @@
 package specs;
 
-import as3.ac3core.NumberCore;
-import as3.as3types.TypeDefs;
-import as3.as3types.Rectangle;
+import as3.NumberCore;
+import as3.TypeDefs;
+import as3.Rectangle;
 import jasmine.J;
 
-using as3.ac3core.PointCore;
+using as3.PointCore;
 
 class PointCoreSpec {
 

@@ -1,9 +1,9 @@
 package voronoimap;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 import voronoimap.graph.Edge;
 
-using as3.ac3core.ConversionCore;
+using as3.ConversionCore;
 
 class Lava {
 

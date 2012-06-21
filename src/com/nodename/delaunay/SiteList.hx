@@ -1,13 +1,13 @@
 package com.nodename.delaunay;
 
-import as3.ac3core.NumberCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.NumberCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import com.nodename.geom.Circle;
 import com.nodename.utils.IDisposable;
 
 using Std;
-using as3.ac3core.BitmapDataCore;
+using as3.BitmapDataCore;
 
 class SiteList implements IDisposable {
 

@@ -1,6 +1,6 @@
 package de.polygonal.math;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class PM_PRNG {
 

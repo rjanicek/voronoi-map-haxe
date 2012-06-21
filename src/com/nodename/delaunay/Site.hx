@@ -1,14 +1,14 @@
 package com.nodename.delaunay;
 
-import as3.ac3core.PointCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.PointCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import com.nodename.geom.Polygon;
 import com.nodename.geom.Winding;
 
 import com.nodename.delaunay.EdgeReorderer;
 
-using as3.ac3core.RectangleCore;
+using as3.RectangleCore;
 
 class Site implements ICoord {
 

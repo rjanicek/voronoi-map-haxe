@@ -1,6 +1,6 @@
 package com.nodename.geom;
-import as3.ac3core.PointCore;
-import as3.as3types.TypeDefs;
+import as3.PointCore;
+import as3.TypeDefs;
 
 class LineSegment {
 

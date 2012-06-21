@@ -1,9 +1,9 @@
 package com.nodename.delaunay;
 
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.Rectangle;
+import as3.TypeDefs;
 
-using as3.ac3core.RectangleCore;
+using as3.RectangleCore;
 
 class BoundsCheck {
 

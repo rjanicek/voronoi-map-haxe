@@ -1,6 +1,6 @@
 package voronoimap.graph;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class Edge {
 	public function new () { }

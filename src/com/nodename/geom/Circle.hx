@@ -1,6 +1,6 @@
 package com.nodename.geom;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 
 class Circle {
 

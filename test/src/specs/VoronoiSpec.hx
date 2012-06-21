@@ -1,15 +1,15 @@
 package specs;
 
-import as3.ac3core.NumberCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.NumberCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import co.janicek.core.math.RandomCore;
 import com.nodename.delaunay.Site;
 import com.nodename.delaunay.Voronoi;
 import jasmine.J;
 
 using co.janicek.core.math.RandomCore;
-using as3.ac3core.PointCore;
+using as3.PointCore;
 
 class VoronoiSpec {
 

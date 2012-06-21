@@ -1,11 +1,11 @@
 package voronoimap;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 import co.janicek.core.array.Array2dCore;
 import co.janicek.core.math.PerlinNoise;
 import de.polygonal.math.PM_PRNG;
 
-using as3.ac3core.PointCore;
+using as3.PointCore;
 using co.janicek.core.array.Array2dCore;
 using co.janicek.core.math.RandomCore;
 using Std;

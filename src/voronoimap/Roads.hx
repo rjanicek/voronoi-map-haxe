@@ -3,7 +3,7 @@ import voronoimap.graph.Center;
 import voronoimap.graph.Corner;
 import voronoimap.graph.Edge;
 
-using as3.ac3core.ConversionCore;
+using as3.ConversionCore;
 
 /**
  * ...

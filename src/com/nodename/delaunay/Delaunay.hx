@@ -1,10 +1,10 @@
 package com.nodename.delaunay;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 import com.nodename.geom.LineSegment;
 
 using Lambda;
-using as3.ac3core.BitmapDataCore;
+using as3.BitmapDataCore;
 
 class Delaunay {
 

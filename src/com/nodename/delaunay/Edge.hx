@@ -1,12 +1,12 @@
 package com.nodename.delaunay;
 
-import as3.ac3core.PointCore;
-import as3.as3types.Rectangle;
-import as3.as3types.TypeDefs;
+import as3.PointCore;
+import as3.Rectangle;
+import as3.TypeDefs;
 import com.nodename.geom.LineSegment;
 
-using as3.ac3core.BitmapDataCore;
-using as3.ac3core.RectangleCore;
+using as3.BitmapDataCore;
+using as3.RectangleCore;
 
 class Edge {
 

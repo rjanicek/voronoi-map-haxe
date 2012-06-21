@@ -1,9 +1,9 @@
 package com.nodename.delaunay;
 
-import as3.as3types.TypeDefs;
+import as3.TypeDefs;
 import com.nodename.geom.LineSegment;
 
-using as3.ac3core.PointCore;
+using as3.PointCore;
 
 class Kruskal {
 

@@ -5,7 +5,7 @@ import as3.Vector3D;
 import as3.TypeDefs;
 import co.janicek.core.array.Array2dCore;
 import co.janicek.core.html.CanvasCore;
-import co.janicek.core.html.ColorCore;
+import co.janicek.core.html.HtmlColorCore;
 import co.janicek.core.math.PerlinNoise;
 import co.janicek.core.math.RandomCore;
 import haxe.Timer;
@@ -68,7 +68,7 @@ class CanvasRender {
 		c.clearRect(0, 0, 2000, 2000);
 		c.fillStyle = "#bbbbaa";
 		c.fillRect(0, 0, 2000, 2000);
-		c.fillStyle = ColorCore.intToHexColor(displayColors.OCEAN);
+		c.fillStyle = HtmlColorCore.intToHexColor(displayColors.OCEAN);
 		c.fillRect(0, 0, Std.int(mapWidth), Std.int(mapHeight));
     }
 
@@ -96,18 +96,18 @@ class CanvasRender {
 			return color;
 		}
 
-		if (q != null && p.water == q.water) color = ColorCore.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
-		var colorLow:Int = ColorCore.interpolateColor(color, 0x333333, 0.7);
-		var colorHigh:Int = ColorCore.interpolateColor(color, 0xffffff, 0.3);
+		if (q != null && p.water == q.water) color = HtmlColorCore.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
+		var colorLow:Int = HtmlColorCore.interpolateColor(color, 0x333333, 0.7);
+		var colorHigh:Int = HtmlColorCore.interpolateColor(color, 0xffffff, 0.3);
 		var light:Number = calculateLighting(p, r, s);
-		if (light < 0.5) return ColorCore.interpolateColor(colorLow, color, light*2);
-		else return ColorCore.interpolateColor(color, colorHigh, light*2-1);
+		if (light < 0.5) return HtmlColorCore.interpolateColor(colorLow, color, light*2);
+		else return HtmlColorCore.interpolateColor(color, colorHigh, light*2-1);
     }
 	
 	
 	public static function colorWithSmoothColors(color:Int, p:Center, q:Center, edge:Edge, displayColors:DisplayColors):Int {
 		if (q != null && p.water == q.water) {
-			color = ColorPure.interpolateColor(Reflect.field(displayColors, p.biome), Reflect.field(displayColors, q.biome), 0.25);
+			color = HtmlColorCore.interpolateColor(Reflect.field(displayColors, p.biome), Reflect.field(displayColors, q.biome), 0.25);
 		}
 		return color;
     }
@@ -145,7 +145,7 @@ class CanvasRender {
 				}
 			}
 			context.closePath();
-			context.fillStyle = ColorCore.intToHexColor(ColorCore.interpolateColor(color, 0xdddddd, 0.2));
+			context.fillStyle = HtmlColorCore.intToHexColor(HtmlColorCore.interpolateColor(color, 0xdddddd, 0.2));
 			context.fill();
 
 			//Draw borders
@@ -155,7 +155,7 @@ class CanvasRender {
 					context.moveTo(edge.v0.point.x, edge.v0.point.y);
 					if (edge.river > 0) {
 						context.lineWidth = 1;
-						context.strokeStyle = ColorCore.intToHexColor(displayColors.RIVER);
+						context.strokeStyle = HtmlColorCore.intToHexColor(displayColors.RIVER);
 					} else {
 						context.lineWidth = 0.1;
 						context.strokeStyle = "#000000"; 
@@ -188,7 +188,7 @@ class CanvasRender {
 
       // My Voronoi polygon rendering doesn't handle the boundary
       // polygons, so I just fill everything with ocean first.
-      graphics.fillStyle = ColorCore.intToHexColor(colors.OCEAN);
+      graphics.fillStyle = HtmlColorCore.intToHexColor(colors.OCEAN);
       graphics.fillRect(0, 0, Std.int(map.SIZE.width), Std.int(map.SIZE.height));
       
       for (p in map.centers) {
@@ -248,7 +248,7 @@ class CanvasRender {
                    [colors.GRADIENT_LOW, colors.GRADIENT_HIGH], drawPath1);
               } 
 			  else {
-					graphics.fillStyle = ColorCore.intToHexColor(color);
+					graphics.fillStyle = HtmlColorCore.intToHexColor(color);
 					graphics.strokeStyle = graphics.fillStyle;
 					graphics.beginPath();
 					drawPath0();
@@ -284,22 +284,22 @@ class CanvasRender {
 				if (p.ocean != r.ocean) {
 					// One side is ocean and the other side is land -- coastline
 					graphics.lineWidth = 2;
-					graphics.strokeStyle = ColorCore.intToHexColor(colors.COAST);
+					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.COAST);
 				} else if ((p.water.intFromBoolean() > 0) != (r.water.intFromBoolean() > 0) && p.biome != 'ICE' && r.biome != 'ICE') {
 					// Lake boundary
 					graphics.lineWidth = 1;
-					graphics.strokeStyle = ColorCore.intToHexColor(colors.LAKESHORE);
+					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.LAKESHORE);
 				} else if (p.water || r.water) {
 					// Lake interior – we don't want to draw the rivers here
 					continue;
 				} else if (lava.lava[edge.index]) {
 					// Lava flow
 					graphics.lineWidth = 1;
-					graphics.strokeStyle = ColorCore.intToHexColor(colors.LAVA);
+					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.LAVA);
 				} else if (edge.river > 0) {
 					// River edge
 					graphics.lineWidth = Math.sqrt(edge.river);
-					graphics.strokeStyle = ColorCore.intToHexColor(colors.RIVER);
+					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.RIVER);
 				} else {
 					// No edge
 					continue;
@@ -350,15 +350,15 @@ class CanvasRender {
         // be trusted.  NOTE: only works for 1, 2, 3 colors in the array
         var color:UInt = colors[0];
         if (colors.length == 2) {
-          color = ColorCore.interpolateColor(colors[0], colors[1], V.z);
+          color = HtmlColorCore.interpolateColor(colors[0], colors[1], V.z);
         } else if (colors.length == 3) {
           if (V.z < 0.5) {
-            color = ColorCore.interpolateColor(colors[0], colors[1], V.z*2);
+            color = HtmlColorCore.interpolateColor(colors[0], colors[1], V.z*2);
           } else {
-            color = ColorCore.interpolateColor(colors[1], colors[2], V.z*2-1);
+            color = HtmlColorCore.interpolateColor(colors[1], colors[2], V.z*2-1);
           }
         }
-		graphics.fillStyle = ColorCore.intToHexColor(color); //graphics.beginFill(color);
+		graphics.fillStyle = HtmlColorCore.intToHexColor(color); //graphics.beginFill(color);
       } else {
         // The gradient box is weird to set up, so we let Flash set up
         // a basic matrix and then we alter it:

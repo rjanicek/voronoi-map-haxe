@@ -7,6 +7,11 @@ import de.polygonal.math.PM_PRNG;
 import haxe.Firebug;
 import html5.Canvas;
 import html5.CanvasRenderingContext2D;
+import html5.File;
+import html5.FileList;
+import html5.FileReader;
+import html5.Image;
+import html5.typedArrays.ArrayBuffer;
 import js.JQuery;
 import js.Lib;
 import voronoimap.html.CanvasRender;
@@ -21,11 +26,14 @@ class Html {
 	public static inline var ID_map = "map";
 	
 	public static inline var S_addNoise = "#addNoise";
-	public static inline var S_bitmapUrl = "#bitmapUrl";
 	public static inline var S_fields = "#fields";
 	public static inline var S_fieldset = "#fieldset";
 	public static inline var S_generate = "#generate";
 	public static inline var S_height = "#height";
+	public static inline var S_imageFile = "#imageFile";
+	public static inline var S_imageThumb = "#imageThumb";
+	public static inline var S_imageThreshold = "#imageThreshold";
+	public static inline var S_invertImage = "#invertImage";
 	public static inline var S_islandFactor = "#islandFactor";
 	public static inline var S_islandShape = "#islandShape";
 	public static inline var S_lakeThreshold = "#lakeThreshold";
@@ -44,6 +52,8 @@ class Html {
 }
 
 class Main {
+
+	private static var image : Image;
 	
 	static function main() {
 		Firebug.redirectTraces();
@@ -52,6 +62,13 @@ class Main {
 	}
 	
 	public static function initializeUi():Void {
+		image = new Image();
+		image.onload = function() {
+			new JQuery(Html.S_imageThumb).attr("src", image.src);
+			updateThumb();
+		}
+		image.src = "world-map.jpg";
+		
 		new JQuery(Html.S_random).click(function(){
 			new JQuery(Html.S_seed).val(Std.string(RandomCore.makeRandomSeed()));
 		});
@@ -60,14 +77,28 @@ class Main {
 		});
 		
 		new JQuery(Html.S_islandShape).change(function(e) {
-			new JQuery([Html.S_islandFactor, Html.S_oceanRatio, Html.S_shapeSeed, Html.S_bitmapUrl].toString()).parent().hide();
+			new JQuery([Html.S_islandFactor, Html.S_oceanRatio, Html.S_shapeSeed, Html.S_imageThumb, Html.S_invertImage, Html.S_imageThreshold].toString()).parent().hide();
 			switch(new JQuery(Html.S_islandShape).val()) {
-				case "bitmap": new JQuery(Html.S_bitmapUrl).parent().show();
+				case "bitmap": new JQuery([Html.S_imageFile, Html.S_imageThumb, Html.S_invertImage, Html.S_imageThreshold].toString()).parent().show();
 				case "noise": new JQuery(Html.S_shapeSeed).parent().show();
 				case "perlin": new JQuery([Html.S_oceanRatio, Html.S_shapeSeed].toString()).parent().show();
 				case "radial": new JQuery([Html.S_islandFactor, Html.S_shapeSeed].toString()).parent().show();
 			}
 		});
+		
+		new JQuery(Html.S_imageFile).change(function(e) {
+			trace("file changed");
+			var fileUpload:Dynamic = new JQuery(Html.S_imageFile).get()[0];
+			var files:FileList = fileUpload.files;
+			if (files.length == 1) {
+				var file:File = files[0];
+				if (StringTools.startsWith(file.type, "image")) {
+					CanvasCore.loadFileIntoImage(file, image);
+				}
+			}
+		} );
+
+		new JQuery([Html.S_invertImage, Html.S_imageThreshold].toString()).change(function(e) { updateThumb(); } );
 		
 		new JQuery(Html.S_width).val(Std.string(Lib.window.innerWidth));
 		new JQuery(Html.S_height).val(Std.string(Lib.window.innerHeight));
@@ -87,6 +118,20 @@ class Main {
 				new JQuery(Html.S_toggle).text(fields.is(":visible") ? "hide" : "show");
 			});
 		});
+	}
+	
+	private static function updateThumb() : Void {
+		var threshold = new JQuery(Html.S_imageThreshold).val().parseInt();
+		var color1 = Style.displayColors.OCEAN;
+		var color2 = Style.displayColors.GRASSLAND;
+		if (new JQuery(Html.S_invertImage).is(":checked")) {
+			var colorHold = color1;
+			color1 = color2;
+			color2 = colorHold;
+		}
+		var thresholdImageData = image.getImageData().makeAverageThresholdImageData(threshold, color1, color2);
+		var imageDataUrl = thresholdImageData.makeImageDataUrlFromImageData();
+		new JQuery(Html.S_imageThumb).attr("src", imageDataUrl);
 	}	
 	
 	public static function getContext():CanvasRenderingContext2D {
@@ -123,12 +168,13 @@ class Main {
 		
 		switch(islandShape) {
 			case "bitmap" :
-				CanvasCore.loadImage(new JQuery(Html.S_bitmapUrl).val(), function(image) {
 					var imageData = CanvasCore.getImageData(image);
-					var bitmap = CanvasCore.makeAverageThresholdBitmap(imageData, 127).invertBitmap();
-					map.newIsland(IslandShape.makeBitmap(bitmap), 1);
-					buildMapAndRender(map);
-				});
+					trace(new JQuery(Html.S_imageThreshold).val().parseInt());
+					var bitmap = CanvasCore.makeAverageThresholdBitmap(imageData, new JQuery(Html.S_imageThreshold).val().parseInt());
+					if (new JQuery(Html.S_invertImage).is(":checked")) {
+						bitmap = bitmap.invertBitmap();
+					}
+					map.newIsland(IslandShape.makeBitmap(bitmap), seed);
 			case "blob" : map.newIsland(IslandShape.makeBlob(), seed);
 			case "noise" : map.newIsland(IslandShape.makeNoise(shapeSeed), seed);
 			case "perlin" : map.newIsland(IslandShape.makePerlin(shapeSeed, new JQuery(Html.S_oceanRatio).val().parseFloat()), seed);
@@ -136,20 +182,6 @@ class Main {
 			case "square" :	map.newIsland(IslandShape.makeSquare(), seed);
 		}
 		
-		if (islandShape != "bitmap") {
-			buildMapAndRender(map);
-		}
-	}
-	
-	private static function getIntegerOrStringSeed( s : String ) : Int {
-		if (s.isInteger()) {
-			return s.parseInt();
-		}
-		
-		return RandomCore.stringToSeed(s).abs().int();
-	}
-	
-	private static function buildMapAndRender(map:Map) {
 		var noisyEdges = new NoisyEdges();
 		var lava = new Lava();
 		
@@ -161,7 +193,15 @@ class Main {
 		map.go5DecorateMap();
 		noisyEdges.buildNoisyEdges(map, lava, new PM_PRNG());
 		render(map, noisyEdges, lava);
-	}	
+	}
+	
+	private static function getIntegerOrStringSeed( s : String ) : Int {
+		if (s.isInteger()) {
+			return s.parseInt();
+		}
+		
+		return RandomCore.stringToSeed(s).abs().int();
+	}
 	
 	private static function render(map:Map, noisyEdges:NoisyEdges, lava:Lava):Void {
 		var c = getContext();

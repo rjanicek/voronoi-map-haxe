@@ -1,6 +1,7 @@
 package voronoimap.html;
 
 import as3.Matrix;
+import as3.PointCore;
 import as3.Vector3D;
 import as3.TypeDefs;
 import co.janicek.core.array.Array2dCore;
@@ -19,9 +20,13 @@ import voronoimap.IslandShape;
 import voronoimap.Lava;
 import voronoimap.Map;
 import voronoimap.NoisyEdges;
+import voronoimap.Roads;
+import voronoimap.Watersheds;
 
 using as3.ConversionCore;
+using as3.PointCore;
 using co.janicek.core.array.Array2dCore;
+using co.janicek.core.NullCore;
 using Lambda;
 using Std;
 
@@ -181,6 +186,44 @@ class CanvasRender {
 		
 	}
 	
+	/**
+	 * Render the paths from each polygon to the ocean, showing watersheds.
+	 */
+	public static function renderWatersheds( graphics : CanvasRenderingContext2D, map : Map, watersheds : Watersheds ) : Void {
+		var edge:Edge, w0:Int, w1:Int;
+
+		for (edge in map.edges) {
+			if (edge.d0.isNotNull() && edge.d1.isNotNull() && edge.v0.isNotNull() && edge.v1.isNotNull() && !edge.d0.ocean && !edge.d1.ocean) {
+				w0 = watersheds.watersheds[edge.d0.index];
+				w1 = watersheds.watersheds[edge.d1.index];
+				if (w0 != w1) {
+					graphics.beginPath();
+					//graphics.lineStyle(3.5, 0x000000, 0.1 * Math.sqrt((map.corners[w0].watershed_size || 1) + (map.corners[w1].watershed.watershed_size || 1)));
+					graphics.lineWidth = 3.5;
+					graphics.strokeStyle = HtmlColorCore.rgba(0, 0, 0, 0.1 * Math.sqrt((map.corners[w0].watershed_size.coalesce(1)) + (map.corners[w1].watershed.watershed_size.coalesce(1))));
+					graphics.moveTo(edge.v0.point.x, edge.v0.point.y);
+					graphics.lineTo(edge.v1.point.x, edge.v1.point.y);
+					graphics.closePath(); //graphics.lineStyle();
+					graphics.stroke();
+				}
+			}
+		}
+
+		for (edge in map.edges) {
+			if (edge.river.booleanFromInt()) {
+				graphics.beginPath();
+				//graphics.lineStyle(1.0, 0x6699ff);
+				graphics.lineWidth = 1.0;
+				graphics.strokeStyle = "#6699ff";
+				graphics.moveTo(edge.v0.point.x, edge.v0.point.y);
+				graphics.lineTo(edge.v1.point.x, edge.v1.point.y);
+				//graphics.lineStyle();
+				graphics.closePath();
+				graphics.stroke();
+			}
+		}
+    }
+	
     // Render the interior of polygons
 
     public static function renderPolygons(graphics:CanvasRenderingContext2D, colors:Dynamic, gradientFillProperty:String, colorOverrideFunction:Int->Center->Center->Edge->DisplayColors->Int, map:Map, noisyEdges:NoisyEdges):Void {
@@ -267,10 +310,97 @@ class CanvasRender {
 		}
 	}
 	
+	
+    /**
+     * Render roads. We draw these before polygon edges, so that rivers overwrite roads.
+     */ 
+    public static function renderRoads( graphics : CanvasRenderingContext2D, map : Map, roads : Roads, colors : DisplayColors ) : Void {
+		// First draw the roads, because any other feature should draw
+		// over them. Also, roads don't use the noisy lines.
+		var p:Center, A:Point, B:Point, C:Point;
+		var i:Int, j:Int, d:Number, edge1:Edge, edge2:Edge, edges:Vector<Edge>;
+
+		/**
+		 * Helper function: find the normal vector across edge 'e' and
+		 * make sure to point it in a direction towards 'c'.
+		 */
+		function normalTowards( e : Edge, c : Point, len : Number ) : Point {
+			// Rotate the v0-->v1 vector by 90 degrees:
+			var n : Point = { x: -(e.v1.point.y - e.v0.point.y), y: e.v1.point.x - e.v0.point.x };
+			// Flip it around it if doesn't point towards c
+			var d : Point = c.subtract(e.midpoint);
+			if (n.x * d.x + n.y * d.y < 0) {
+				n.x = -n.x;
+				n.y = -n.y;
+			}
+			n.normalize(len);
+			return n;
+		}
+      
+		for (p in map.centers) {
+			if (roads.roadConnections[p.index].isNotNull()) {
+				if (roads.roadConnections[p.index].length == 2) {
+					// Regular road: draw a spline from one edge to the other.
+					edges = p.borders;
+					for (i in 0...edges.length) {
+						edge1 = edges[i];
+						if (roads.road[edge1.index] > 0) {
+							for (j in i+1...edges.length) {
+								edge2 = edges[j];
+								if (roads.road[edge2.index] > 0) {
+									// The spline connects the midpoints of the edges
+									// and at right angles to them. In between we
+									// generate two control points A and B and one
+									// additional vertex C.  This usually works but
+									// not always.
+									d = 0.5 * Math.min(
+										edge1.midpoint.subtract(p.point).distanceFromOrigin(),
+										edge2.midpoint.subtract(p.point).distanceFromOrigin()
+									);
+									A = normalTowards(edge1, p.point, d).add(edge1.midpoint);
+									B = normalTowards(edge2, p.point, d).add(edge2.midpoint);
+									C = PointCore.interpolate(A, B, 0.5);
+									graphics.beginPath();
+									graphics.lineWidth = 1.1;
+									graphics.strokeStyle = HtmlColorCore.intToHexColor(Reflect.field(colors, "ROAD" + roads.road[edge1.index]));
+									graphics.moveTo(edge1.midpoint.x, edge1.midpoint.y);
+									graphics.quadraticCurveTo(A.x, A.y, C.x, C.y);
+									graphics.moveTo(C.x, C.y);
+									graphics.lineWidth = 1.1;
+									graphics.strokeStyle = HtmlColorCore.intToHexColor(Reflect.field(colors, "ROAD" + roads.road[edge2.index]));
+									graphics.quadraticCurveTo(B.x, B.y, edge2.midpoint.x, edge2.midpoint.y);
+									graphics.stroke();
+									graphics.closePath();									
+								}
+							}
+						}
+					}
+				}
+				else {
+					// Intersection or dead end: draw a road spline from
+					// each edge to the center
+					for (edge1 in p.borders) {
+						if (roads.road[edge1.index] > 0) {
+							d = 0.25 * edge1.midpoint.subtract(p.point).distanceFromOrigin();
+							A = normalTowards(edge1, p.point, d).add(edge1.midpoint);
+							graphics.beginPath();
+							graphics.lineWidth = 1.4;
+							graphics.strokeStyle = HtmlColorCore.intToHexColor(Reflect.field(colors, "ROAD" + roads.road[edge1.index]));
+							graphics.moveTo(edge1.midpoint.x, edge1.midpoint.y);
+							graphics.quadraticCurveTo(A.x, A.y, p.point.x, p.point.y);
+							graphics.stroke();
+							graphics.closePath();
+						}
+					}
+				}
+			}
+		}
+	}
+	
     // Render the exterior of polygons: coastlines, lake shores,
     // rivers, lava fissures. We draw all of these after the polygons
     // so that polygons don't overwrite any edges.
-    public static function renderEdges(graphics:CanvasRenderingContext2D, colors:Dynamic, map:Map, noisyEdges:NoisyEdges, lava:Lava):Void {
+    public static function renderEdges(graphics:CanvasRenderingContext2D, colors:Dynamic, map:Map, noisyEdges:NoisyEdges, lava:Lava, renderRivers = true):Void {
 		var p:Center, r:Center, edge:Edge;
 		
 		for (p in map.centers) {
@@ -296,10 +426,11 @@ class CanvasRender {
 					// Lava flow
 					graphics.lineWidth = 1;
 					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.LAVA);
-				} else if (edge.river > 0) {
+				} else if (edge.river > 0 && renderRivers) {
 					// River edge
 					graphics.lineWidth = Math.sqrt(edge.river);
 					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.RIVER);
+					
 				} else {
 					// No edge
 					continue;

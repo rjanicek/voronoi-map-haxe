@@ -31,8 +31,8 @@ class Html {
 	public static inline var S_generate = "#generate";
 	public static inline var S_height = "#height";
 	public static inline var S_imageFile = "#imageFile";
-	public static inline var S_imageThumb = "#imageThumb";
 	public static inline var S_imageThreshold = "#imageThreshold";
+	public static inline var S_imageThumb = "#imageThumb";
 	public static inline var S_invertImage = "#invertImage";
 	public static inline var S_islandFactor = "#islandFactor";
 	public static inline var S_islandShape = "#islandShape";
@@ -48,6 +48,9 @@ class Html {
 	public static inline var S_shapeSeed = "#shapeSeed";
 	public static inline var S_toggle = "#toggle";
 	public static inline var S_view = "#view";
+	public static inline var S_viewRivers = "#viewRivers";
+	public static inline var S_viewRoads = "#viewRoads";
+	public static inline var S_viewWatersheds = "#viewWatersheds";
 	public static inline var S_width = "#width";
 }
 
@@ -182,8 +185,10 @@ class Main {
 			case "square" :	map.newIsland(IslandShape.makeSquare(), seed);
 		}
 		
+		var watersheds = new Watersheds();
 		var noisyEdges = new NoisyEdges();
 		var lava = new Lava();
+		var roads = new Roads();
 		
 		map.go0PlacePoints();
 		map.go1ImprovePoints();
@@ -191,8 +196,11 @@ class Main {
 		map.go3AssignElevations();
 		map.go4AssignMoisture();
 		map.go5DecorateMap();
+		
+		roads.createRoads(map);
+		watersheds.createWatersheds(map);
 		noisyEdges.buildNoisyEdges(map, lava, new PM_PRNG());
-		render(map, noisyEdges, lava);
+		render(map, noisyEdges, lava, watersheds, roads);
 	}
 	
 	private static function getIntegerOrStringSeed( s : String ) : Int {
@@ -203,21 +211,30 @@ class Main {
 		return RandomCore.stringToSeed(s).abs().int();
 	}
 	
-	private static function render(map:Map, noisyEdges:NoisyEdges, lava:Lava):Void {
+	private static function render( map : Map, noisyEdges : NoisyEdges, lava : Lava, watersheds : Watersheds, roads : Roads ) : Void {
 		var c = getContext();
 		CanvasRender.graphicsReset(c, map.SIZE.width.int(), map.SIZE.height.int(), Style.displayColors);
 		
 		switch (new JQuery(Html.S_view).val()) {
 			case "debug polygons":
 				CanvasRender.renderDebugPolygons(c, map, Style.displayColors);
+
 			case "smooth":
 				CanvasRender.renderPolygons(c, Style.displayColors, null, CanvasRender.colorWithSlope, map, noisyEdges);
-				CanvasRender.renderEdges(c, Style.displayColors, map, noisyEdges, lava);
+				CanvasRender.renderEdges(c, Style.displayColors, map, noisyEdges, lava, new JQuery(Html.S_viewRivers).is(":checked"));
+		}
+		
+		if (new JQuery(Html.S_viewRoads).is(":checked")) {
+			CanvasRender.renderRoads(c, map, roads, Style.displayColors);
+		}
+		
+		if (new JQuery(Html.S_viewWatersheds).is(":checked")) {
+			CanvasRender.renderWatersheds(c, map, watersheds);
 		}
 		
 		if (new JQuery(Html.S_addNoise).is(":checked")) {
 			CanvasCore.addNoiseToCanvas(c, 666, 10, true);
-		}		
+		}
 		
 	}
 	

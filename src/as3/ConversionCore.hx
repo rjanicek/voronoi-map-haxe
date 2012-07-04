@@ -12,12 +12,4 @@ class ConversionCore {
 		return (i == null) ? false : i > 0;
 	}
 	
-	public static inline function isNull(d:Dynamic):Boolean {
-		return d == null;
-	}
-	
-	public static inline function isNotNull(d:Dynamic):Boolean {
-		return d != null;
-	}
-
 }

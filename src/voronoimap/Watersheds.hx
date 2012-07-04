@@ -2,11 +2,6 @@ package voronoimap;
 import voronoimap.graph.Center;
 import voronoimap.graph.Corner;
 
-/**
- * ...
- * @author Richard Janicek
- */
-
 class Watersheds {
     public var lowestCorner:Array<Int>;  // polygon index -> corner index
     public var watersheds:Array<Int>;  // polygon index -> corner index

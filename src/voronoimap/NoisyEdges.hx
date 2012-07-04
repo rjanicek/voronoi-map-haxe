@@ -8,6 +8,7 @@ import voronoimap.graph.Edge;
 
 using as3.ConversionCore;
 using as3.PointCore;
+using co.janicek.core.NullCore;
 
 class NoisyEdges {
 

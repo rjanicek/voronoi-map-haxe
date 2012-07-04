@@ -27,19 +27,6 @@ class ConversionCoreSpec {
 				J.expect(1.booleanFromInt()).toBeTruthy();
 			});
 			
-			J.it("should make boolean from dynamic", function() {
-				J.expect(true.isNull()).toBeFalsy();
-				J.expect(true.isNotNull()).toBeTruthy();
-				J.expect(1.isNull()).toBeFalsy();
-				J.expect(1.isNotNull()).toBeTruthy();
-				var p:Point = null;
-				J.expect(p.isNull()).toBeTruthy();
-				J.expect(p.isNotNull()).toBeFalsy();
-				p = { x:0.0, y:0.0 };
-				J.expect(p.isNull()).toBeFalsy();
-				J.expect(p.isNotNull()).toBeTruthy();
-			});
-			
 		});
 	}
 	

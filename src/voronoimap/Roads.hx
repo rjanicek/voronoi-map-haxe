@@ -3,12 +3,7 @@ import voronoimap.graph.Center;
 import voronoimap.graph.Corner;
 import voronoimap.graph.Edge;
 
-using as3.ConversionCore;
-
-/**
- * ...
- * @author Richard Janicek
- */
+using co.janicek.core.NullCore;
 
 class Roads {
 
@@ -47,13 +42,13 @@ class Roads {
       while (queue.length > 0) {
         p = queue.shift();
         for (r in p.neighbors) {
-            newLevel = centerContour[p.index].isNull() ? 0 : centerContour[p.index];
+            newLevel = centerContour[p.index].coalesce(0);
             while (r.elevation > elevationThresholds[newLevel] && !r.water) {
               // NOTE: extend the contour line past bodies of
               // water so that roads don't terminate inside lakes.
               newLevel += 1;
             }
-            if (newLevel < (centerContour[r.index].isNull() ? 999 : centerContour[r.index])) {
+            if (newLevel < centerContour[r.index].coalesce(999)) {
               centerContour[r.index] = newLevel;
               queue.push(r);
             }
@@ -63,8 +58,8 @@ class Roads {
 	  // A corner's contour level is the MIN of its polygons
       for (p in map.centers) {
           for (q in p.corners) {
-              cornerContour[q.index] = Std.int(Math.min(cornerContour[q.index].isNull() ? 999 : cornerContour[q.index],
-                                                centerContour[p.index].isNull() ? 999 : cornerContour[q.index]));
+              cornerContour[q.index] = Std.int(Math.min(cornerContour[q.index].coalesce(999),
+                                                centerContour[p.index].coalesce(999)));
             }
         }
 

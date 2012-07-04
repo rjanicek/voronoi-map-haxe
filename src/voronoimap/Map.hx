@@ -12,9 +12,10 @@ import voronoimap.graph.Center;
 import voronoimap.graph.Corner;
 import voronoimap.graph.Edge;
 
-using Lambda;
 using as3.ConversionCore;
 using as3.PointCore;
+using co.janicek.core.NullCore;
+using Lambda;
 
 class Map {
 

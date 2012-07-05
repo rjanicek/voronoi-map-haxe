@@ -2217,7 +2217,7 @@ voronoimap.Main.initializeUi = function() {
 		}
 	});
 	new js.JQuery("#imageFile").change(function(e) {
-		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 93, className : "voronoimap.Main", methodName : "initializeUi"});
+		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 94, className : "voronoimap.Main", methodName : "initializeUi"});
 		var fileUpload = new js.JQuery("#imageFile").get()[0];
 		var files = fileUpload.files;
 		if(files.length == 1) {
@@ -2285,7 +2285,7 @@ voronoimap.Main.generate = function() {
 	switch(islandShape) {
 	case "bitmap":
 		var imageData = co.janicek.core.html.CanvasCore.getImageData(voronoimap.Main.image);
-		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 175, className : "voronoimap.Main", methodName : "generate"});
+		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 176, className : "voronoimap.Main", methodName : "generate"});
 		var bitmap = co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap(imageData,Std.parseInt(new js.JQuery("#imageThreshold").val()));
 		if(new js.JQuery("#invertImage")["is"](":checked")) bitmap = co.janicek.core.html.CanvasCore.invertBitmap(bitmap);
 		map.newIsland(voronoimap.IslandShape.makeBitmap(bitmap),seed);
@@ -2338,6 +2338,7 @@ voronoimap.Main.render = function(map,noisyEdges,lava,watersheds,roads) {
 		break;
 	}
 	if(new js.JQuery("#viewRoads")["is"](":checked")) voronoimap.html.CanvasRender.renderRoads(c,map,roads,voronoimap.html.Style.displayColors);
+	if(new js.JQuery("#viewBridges")["is"](":checked")) voronoimap.html.CanvasRender.renderBridges(c,map,roads,voronoimap.html.Style.displayColors);
 	if(new js.JQuery("#viewWatersheds")["is"](":checked")) voronoimap.html.CanvasRender.renderWatersheds(c,map,watersheds);
 	if(new js.JQuery("#addNoise")["is"](":checked")) co.janicek.core.html.CanvasCore.addNoiseToCanvas(c,666,10,true);
 }
@@ -3366,6 +3367,26 @@ voronoimap.html.CanvasRender.drawPathForwards = function(graphics,path) {
 		graphics.lineTo(path[i].x,path[i].y);
 	}
 }
+voronoimap.html.CanvasRender.renderBridges = function(graphics,map,roads,colors) {
+	var edge;
+	var _g = 0, _g1 = map.edges;
+	while(_g < _g1.length) {
+		var edge1 = _g1[_g];
+		++_g;
+		if(edge1.river > 0 && edge1.river < 4 && !edge1.d0.water && !edge1.d1.water && (edge1.d0.elevation > 0.05 || edge1.d1.elevation > 0.05)) {
+			var n = { x : -(edge1.v1.point.y - edge1.v0.point.y), y : edge1.v1.point.x - edge1.v0.point.x};
+			as3.PointCore.normalize(n,0.25 + (roads.road[edge1.index] != null?0.5:0) + 0.75 * Math.sqrt(edge1.river));
+			graphics.beginPath();
+			graphics.lineWidth = 1.1;
+			graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(colors.BRIDGE);
+			graphics.lineCap = "square";
+			graphics.moveTo(edge1.midpoint.x - n.x,edge1.midpoint.y - n.y);
+			graphics.lineTo(edge1.midpoint.x + n.x,edge1.midpoint.y + n.y);
+			graphics.closePath();
+			graphics.stroke();
+		}
+	}
+}
 voronoimap.html.CanvasRender.renderRoads = function(graphics,map,roads,colors) {
 	var p, A, B, C;
 	var i, j, d, edge1, edge2, edges;
@@ -3665,6 +3686,7 @@ voronoimap.Html.S_shapeRandom = "#shapeRandom";
 voronoimap.Html.S_shapeSeed = "#shapeSeed";
 voronoimap.Html.S_toggle = "#toggle";
 voronoimap.Html.S_view = "#view";
+voronoimap.Html.S_viewBridges = "#viewBridges";
 voronoimap.Html.S_viewRivers = "#viewRivers";
 voronoimap.Html.S_viewRoads = "#viewRoads";
 voronoimap.Html.S_viewWatersheds = "#viewWatersheds";

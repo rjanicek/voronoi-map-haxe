@@ -392,92 +392,77 @@ StringBuf.prototype = {
 	,__class__: StringBuf
 }
 var as3 = as3 || {}
-if(!as3.ac3core) as3.ac3core = {}
-as3.ac3core.BitmapDataCore = $hxClasses["as3.ac3core.BitmapDataCore"] = function() { }
-as3.ac3core.BitmapDataCore.__name__ = ["as3","ac3core","BitmapDataCore"];
-as3.ac3core.BitmapDataCore.dispose = function(bd) {
+as3.BitmapDataCore = $hxClasses["as3.BitmapDataCore"] = function() { }
+as3.BitmapDataCore.__name__ = ["as3","BitmapDataCore"];
+as3.BitmapDataCore.dispose = function(bd) {
 }
-as3.ac3core.BitmapDataCore.drawLine = function(bd,a,b) {
+as3.BitmapDataCore.drawLine = function(bd,a,b) {
 	throw "not implemented";
 	return null;
 }
-as3.ac3core.BitmapDataCore.getPixel = function(bd,x,y) {
+as3.BitmapDataCore.getPixel = function(bd,x,y) {
 	throw "not implemented";
 	return null;
 }
-as3.ac3core.BitmapDataCore.hitTest = function(bd,firstPoint,firstAlphaThreshold,secondObject,secondBitmapDataPoint,secondAlphaThreshold) {
+as3.BitmapDataCore.hitTest = function(bd,firstPoint,firstAlphaThreshold,secondObject,secondBitmapDataPoint,secondAlphaThreshold) {
 	if(secondAlphaThreshold == null) secondAlphaThreshold = 1;
 	throw "not implemented";
 	return null;
 }
-as3.ac3core.BitmapDataCore.perlinNoise = function(bd,baseX,baseY,numOctaves,randomSeed,stitch,fractalNoise) {
+as3.BitmapDataCore.perlinNoise = function(bd,baseX,baseY,numOctaves,randomSeed,stitch,fractalNoise) {
 	throw "not implemented";
 	return null;
 }
-as3.ac3core.BitmapDataCore.prototype = {
-	__class__: as3.ac3core.BitmapDataCore
+as3.BitmapDataCore.prototype = {
+	__class__: as3.BitmapDataCore
 }
-as3.ac3core.ConversionCore = $hxClasses["as3.ac3core.ConversionCore"] = function() { }
-as3.ac3core.ConversionCore.__name__ = ["as3","ac3core","ConversionCore"];
-as3.ac3core.ConversionCore.intFromBoolean = function(b) {
+as3.ConversionCore = $hxClasses["as3.ConversionCore"] = function() { }
+as3.ConversionCore.__name__ = ["as3","ConversionCore"];
+as3.ConversionCore.intFromBoolean = function(b) {
 	return b?1:0;
 }
-as3.ac3core.ConversionCore.booleanFromInt = function(i) {
+as3.ConversionCore.booleanFromInt = function(i) {
 	return i == null?false:i > 0;
 }
-as3.ac3core.ConversionCore.isNull = function(d) {
-	return d == null;
+as3.ConversionCore.prototype = {
+	__class__: as3.ConversionCore
 }
-as3.ac3core.ConversionCore.isNotNull = function(d) {
-	return d != null;
+as3.NumberCore = $hxClasses["as3.NumberCore"] = function() { }
+as3.NumberCore.__name__ = ["as3","NumberCore"];
+as3.NumberCore.prototype = {
+	__class__: as3.NumberCore
 }
-as3.ac3core.ConversionCore.prototype = {
-	__class__: as3.ac3core.ConversionCore
+as3.PointCore = $hxClasses["as3.PointCore"] = function() { }
+as3.PointCore.__name__ = ["as3","PointCore"];
+as3.PointCore.distanceFromOrigin = function(p) {
+	return Math.sqrt(p.x * p.x + p.y * p.y);
 }
-as3.ac3core.NumberCore = $hxClasses["as3.ac3core.NumberCore"] = function() { }
-as3.ac3core.NumberCore.__name__ = ["as3","ac3core","NumberCore"];
-as3.ac3core.NumberCore.prototype = {
-	__class__: as3.ac3core.NumberCore
-}
-as3.ac3core.PointCore = $hxClasses["as3.ac3core.PointCore"] = function() { }
-as3.ac3core.PointCore.__name__ = ["as3","ac3core","PointCore"];
-as3.ac3core.PointCore.distanceFromOrigin = function(p) {
-	return as3.ac3core.PointCore.distance({ x : 0.0, y : 0.0},p);
-}
-as3.ac3core.PointCore.distance = function(a,b) {
+as3.PointCore.distance = function(a,b) {
 	return Math.sqrt(Math.pow(a.x - b.x,2) + Math.pow(a.y - b.y,2));
 }
-as3.ac3core.PointCore.interpolate = function(pt1,pt2,f) {
+as3.PointCore.interpolate = function(pt1,pt2,f) {
 	return { x : (pt1.x - pt2.x) * f + pt2.x, y : (pt1.y - pt2.y) * f + pt2.y};
 }
-as3.ac3core.PointCore.subtract = function(p0,p1) {
+as3.PointCore.normalize = function(p,thickness) {
+	if(p.x == 0 && p.y == 0) p.x = thickness; else {
+		var norm = thickness / Math.sqrt(p.x * p.x + p.y * p.y);
+		p.x *= norm;
+		p.y *= norm;
+	}
+}
+as3.PointCore.add = function(p1,p2) {
+	return { x : p2.x + p1.x, y : p2.y + p1.y};
+}
+as3.PointCore.subtract = function(p0,p1) {
 	return { x : p0.x - p1.x, y : p0.y - p1.y};
 }
-as3.ac3core.PointCore.hash = function(p) {
+as3.PointCore.hash = function(p) {
 	return p.x + "," + p.y;
 }
-as3.ac3core.PointCore.prototype = {
-	__class__: as3.ac3core.PointCore
+as3.PointCore.prototype = {
+	__class__: as3.PointCore
 }
-as3.ac3core.RectangleCore = $hxClasses["as3.ac3core.RectangleCore"] = function() { }
-as3.ac3core.RectangleCore.__name__ = ["as3","ac3core","RectangleCore"];
-as3.ac3core.RectangleCore.left = function(r) {
-	return r.x;
-}
-as3.ac3core.RectangleCore.right = function(r) {
-	return r.x + r.width;
-}
-as3.ac3core.RectangleCore.top = function(r) {
-	return r.y;
-}
-as3.ac3core.RectangleCore.bottom = function(r) {
-	return r.y + r.height;
-}
-as3.ac3core.RectangleCore.prototype = {
-	__class__: as3.ac3core.RectangleCore
-}
-if(!as3.as3types) as3.as3types = {}
-as3.as3types.Rectangle = $hxClasses["as3.as3types.Rectangle"] = function(x,y,width,height) {
+as3.Rectangle = $hxClasses["as3.Rectangle"] = function(x,y,width,height) {
 	if(height == null) height = 0;
 	if(width == null) width = 0;
 	if(y == null) y = 0;
@@ -487,17 +472,48 @@ as3.as3types.Rectangle = $hxClasses["as3.as3types.Rectangle"] = function(x,y,wid
 	this.width = width;
 	this.height = height;
 };
-as3.as3types.Rectangle.__name__ = ["as3","as3types","Rectangle"];
-as3.as3types.Rectangle.prototype = {
+as3.Rectangle.__name__ = ["as3","Rectangle"];
+as3.Rectangle.prototype = {
 	x: null
 	,y: null
 	,width: null
 	,height: null
-	,__class__: as3.as3types.Rectangle
+	,__class__: as3.Rectangle
+}
+as3.RectangleCore = $hxClasses["as3.RectangleCore"] = function() { }
+as3.RectangleCore.__name__ = ["as3","RectangleCore"];
+as3.RectangleCore.left = function(r) {
+	return r.x;
+}
+as3.RectangleCore.right = function(r) {
+	return r.x + r.width;
+}
+as3.RectangleCore.top = function(r) {
+	return r.y;
+}
+as3.RectangleCore.bottom = function(r) {
+	return r.y + r.height;
+}
+as3.RectangleCore.prototype = {
+	__class__: as3.RectangleCore
 }
 var co = co || {}
 if(!co.janicek) co.janicek = {}
 if(!co.janicek.core) co.janicek.core = {}
+co.janicek.core.NullCore = $hxClasses["co.janicek.core.NullCore"] = function() { }
+co.janicek.core.NullCore.__name__ = ["co","janicek","core","NullCore"];
+co.janicek.core.NullCore.isNull = function(nullable) {
+	return nullable == null;
+}
+co.janicek.core.NullCore.isNotNull = function(nullable) {
+	return nullable != null;
+}
+co.janicek.core.NullCore.coalesce = function(nullable,defaultValue) {
+	return nullable == null?defaultValue:nullable;
+}
+co.janicek.core.NullCore.prototype = {
+	__class__: co.janicek.core.NullCore
+}
 if(!co.janicek.core.array) co.janicek.core.array = {}
 co.janicek.core.array.Array2dCore = $hxClasses["co.janicek.core.array.Array2dCore"] = function() { }
 co.janicek.core.array.Array2dCore.__name__ = ["co","janicek","core","array","Array2dCore"];
@@ -845,10 +861,10 @@ com.nodename.delaunay.BoundsCheck = $hxClasses["com.nodename.delaunay.BoundsChec
 com.nodename.delaunay.BoundsCheck.__name__ = ["com","nodename","delaunay","BoundsCheck"];
 com.nodename.delaunay.BoundsCheck.check = function(point,bounds) {
 	var value = 0;
-	if(point.x == as3.ac3core.RectangleCore.left(bounds)) value |= 4;
-	if(point.x == as3.ac3core.RectangleCore.right(bounds)) value |= 8;
-	if(point.y == as3.ac3core.RectangleCore.top(bounds)) value |= 1;
-	if(point.y == as3.ac3core.RectangleCore.bottom(bounds)) value |= 2;
+	if(point.x == as3.RectangleCore.left(bounds)) value |= 4;
+	if(point.x == as3.RectangleCore.right(bounds)) value |= 8;
+	if(point.y == as3.RectangleCore.top(bounds)) value |= 1;
+	if(point.y == as3.RectangleCore.bottom(bounds)) value |= 2;
 	return value;
 }
 com.nodename.delaunay.BoundsCheck.prototype = {
@@ -876,8 +892,8 @@ com.nodename.delaunay.Delaunay.selectNonIntersectingEdges = function(keepOutMask
 	var zeroPoint = { x : 0.0, y : 0.0};
 	return Lambda.array(Lambda.filter(edgesToTest,function(edge) {
 		var delaunayLineBmp = edge.makeDelaunayLineBmp();
-		var notIntersecting = !as3.ac3core.BitmapDataCore.hitTest(keepOutMask,zeroPoint,1,delaunayLineBmp,zeroPoint,1);
-		as3.ac3core.BitmapDataCore.dispose(delaunayLineBmp);
+		var notIntersecting = !as3.BitmapDataCore.hitTest(keepOutMask,zeroPoint,1,delaunayLineBmp,zeroPoint,1);
+		as3.BitmapDataCore.dispose(delaunayLineBmp);
 		return notIntersecting;
 	}));
 }
@@ -966,7 +982,7 @@ com.nodename.delaunay.Edge.prototype = {
 		var h = Math.ceil(Math.max(p0.y,p1.y)) | 0;
 		if(h < 1) h = 1;
 		var bmp = new Array();
-		as3.ac3core.BitmapDataCore.drawLine(bmp,p0,p1);
+		as3.BitmapDataCore.drawLine(bmp,p0,p1);
 		return bmp;
 	}
 	,delaunayLine: function() {
@@ -991,7 +1007,7 @@ com.nodename.delaunay.Edge.prototype = {
 		return this.leftVertex == null || this.rightVertex == null;
 	}
 	,sitesDistance: function() {
-		return as3.ac3core.PointCore.distance(this.leftSite._coord,this.rightSite._coord);
+		return as3.PointCore.distance(this.leftSite._coord,this.rightSite._coord);
 	}
 	,clippedEnds: null
 	,visible: null
@@ -1006,7 +1022,7 @@ com.nodename.delaunay.Edge.prototype = {
 	,_edgeIndex: null
 	,dispose: function() {
 		if(this._delaunayLineBmp != null) {
-			as3.ac3core.BitmapDataCore.dispose(this._delaunayLineBmp);
+			as3.BitmapDataCore.dispose(this._delaunayLineBmp);
 			this._delaunayLineBmp = null;
 		}
 		this.leftVertex = null;
@@ -1030,8 +1046,8 @@ com.nodename.delaunay.Edge.prototype = {
 	,clipVertices: function(bounds) {
 		var xmin = bounds.x;
 		var ymin = bounds.y;
-		var xmax = as3.ac3core.RectangleCore.right(bounds);
-		var ymax = as3.ac3core.RectangleCore.bottom(bounds);
+		var xmax = as3.RectangleCore.right(bounds);
+		var ymax = as3.RectangleCore.bottom(bounds);
 		var vertex0, vertex1;
 		var x0, x1, y0, y1;
 		if(this.a == 1.0 && this.b >= 0.0) {
@@ -1495,21 +1511,21 @@ com.nodename.delaunay.Kruskal.kruskal = function(lineSegments,type) {
 	while(i >= 0) {
 		var lineSegment = lineSegments[i];
 		i--;
-		var node0 = nodes.get(as3.ac3core.PointCore.hash(lineSegment.p0));
+		var node0 = nodes.get(as3.PointCore.hash(lineSegment.p0));
 		var rootOfSet0;
 		if(node0 == null) {
 			node0 = nodePool.length > 0?nodePool.pop():new com.nodename.delaunay.Node();
 			rootOfSet0 = node0.parent = node0;
 			node0.treeSize = 1;
-			nodes.set(as3.ac3core.PointCore.hash(lineSegment.p0),node0);
+			nodes.set(as3.PointCore.hash(lineSegment.p0),node0);
 		} else rootOfSet0 = com.nodename.delaunay.Kruskal.find(node0);
-		var node1 = nodes.get(as3.ac3core.PointCore.hash(lineSegment.p1));
+		var node1 = nodes.get(as3.PointCore.hash(lineSegment.p1));
 		var rootOfSet1;
 		if(node1 == null) {
 			node1 = nodePool.length > 0?nodePool.pop():new com.nodename.delaunay.Node();
 			rootOfSet1 = node1.parent = node1;
 			node1.treeSize = 1;
-			nodes.set(as3.ac3core.PointCore.hash(lineSegment.p1),node1);
+			nodes.set(as3.PointCore.hash(lineSegment.p1),node1);
 		} else rootOfSet1 = com.nodename.delaunay.Kruskal.find(node1);
 		if(rootOfSet0 != rootOfSet1) {
 			mst.push(lineSegment);
@@ -1580,7 +1596,7 @@ com.nodename.delaunay.Site.sortSites = function(sites) {
 	}
 }
 com.nodename.delaunay.Site.closeEnough = function(p0,p1) {
-	return as3.ac3core.PointCore.distance(p0,p1) < .005;
+	return as3.PointCore.distance(p0,p1) < .005;
 }
 com.nodename.delaunay.Site.prototype = {
 	coord: null
@@ -1697,56 +1713,56 @@ com.nodename.delaunay.Site.prototype = {
 				var newCheck = com.nodename.delaunay.BoundsCheck.check(newPoint,bounds);
 				var px, py;
 				if((rightCheck & 8) != 0) {
-					px = as3.ac3core.RectangleCore.right(bounds);
+					px = as3.RectangleCore.right(bounds);
 					if((newCheck & 2) != 0) {
-						py = as3.ac3core.RectangleCore.bottom(bounds);
+						py = as3.RectangleCore.bottom(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 1) != 0) {
-						py = as3.ac3core.RectangleCore.top(bounds);
+						py = as3.RectangleCore.top(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 4) != 0) {
-						if(rightPoint.y - bounds.y + newPoint.y - bounds.y < bounds.height) py = as3.ac3core.RectangleCore.top(bounds); else py = as3.ac3core.RectangleCore.bottom(bounds);
+						if(rightPoint.y - bounds.y + newPoint.y - bounds.y < bounds.height) py = as3.RectangleCore.top(bounds); else py = as3.RectangleCore.bottom(bounds);
 						points.push({ x : px, y : py});
-						points.push({ x : as3.ac3core.RectangleCore.left(bounds), y : py});
+						points.push({ x : as3.RectangleCore.left(bounds), y : py});
 					}
 				} else if((rightCheck & 4) != 0) {
-					px = as3.ac3core.RectangleCore.left(bounds);
+					px = as3.RectangleCore.left(bounds);
 					if((newCheck & 2) != 0) {
-						py = as3.ac3core.RectangleCore.bottom(bounds);
+						py = as3.RectangleCore.bottom(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 1) != 0) {
-						py = as3.ac3core.RectangleCore.top(bounds);
+						py = as3.RectangleCore.top(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 8) != 0) {
-						if(rightPoint.y - bounds.y + newPoint.y - bounds.y < bounds.height) py = as3.ac3core.RectangleCore.top(bounds); else py = as3.ac3core.RectangleCore.bottom(bounds);
+						if(rightPoint.y - bounds.y + newPoint.y - bounds.y < bounds.height) py = as3.RectangleCore.top(bounds); else py = as3.RectangleCore.bottom(bounds);
 						points.push({ x : px, y : py});
-						points.push({ x : as3.ac3core.RectangleCore.right(bounds), y : py});
+						points.push({ x : as3.RectangleCore.right(bounds), y : py});
 					}
 				} else if((rightCheck & 1) != 0) {
-					py = as3.ac3core.RectangleCore.top(bounds);
+					py = as3.RectangleCore.top(bounds);
 					if((newCheck & 8) != 0) {
-						px = as3.ac3core.RectangleCore.right(bounds);
+						px = as3.RectangleCore.right(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 4) != 0) {
-						px = as3.ac3core.RectangleCore.left(bounds);
+						px = as3.RectangleCore.left(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 2) != 0) {
-						if(rightPoint.x - bounds.x + newPoint.x - bounds.x < bounds.width) px = as3.ac3core.RectangleCore.left(bounds); else px = as3.ac3core.RectangleCore.right(bounds);
+						if(rightPoint.x - bounds.x + newPoint.x - bounds.x < bounds.width) px = as3.RectangleCore.left(bounds); else px = as3.RectangleCore.right(bounds);
 						points.push({ x : px, y : py});
-						points.push({ x : px, y : as3.ac3core.RectangleCore.bottom(bounds)});
+						points.push({ x : px, y : as3.RectangleCore.bottom(bounds)});
 					}
 				} else if((rightCheck & 2) != 0) {
-					py = as3.ac3core.RectangleCore.bottom(bounds);
+					py = as3.RectangleCore.bottom(bounds);
 					if((newCheck & 8) != 0) {
-						px = as3.ac3core.RectangleCore.right(bounds);
+						px = as3.RectangleCore.right(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 4) != 0) {
-						px = as3.ac3core.RectangleCore.left(bounds);
+						px = as3.RectangleCore.left(bounds);
 						points.push({ x : px, y : py});
 					} else if((newCheck & 1) != 0) {
-						if(rightPoint.x - bounds.x + newPoint.x - bounds.x < bounds.width) px = as3.ac3core.RectangleCore.left(bounds); else px = as3.ac3core.RectangleCore.right(bounds);
+						if(rightPoint.x - bounds.x + newPoint.x - bounds.x < bounds.width) px = as3.RectangleCore.left(bounds); else px = as3.RectangleCore.right(bounds);
 						points.push({ x : px, y : py});
-						points.push({ x : px, y : as3.ac3core.RectangleCore.top(bounds)});
+						points.push({ x : px, y : as3.RectangleCore.top(bounds)});
 					}
 				}
 			}
@@ -1765,7 +1781,7 @@ com.nodename.delaunay.Site.prototype = {
 		return this._coord.y;
 	}
 	,dist: function(p) {
-		return as3.ac3core.PointCore.distance(p.get_coord(),this._coord);
+		return as3.PointCore.distance(p.get_coord(),this._coord);
 	}
 	,__class__: com.nodename.delaunay.Site
 	,__properties__: {get_y:"getY",get_x:"getX",get_edges:"get_edges",get_coord:"get_coord"}
@@ -1810,7 +1826,7 @@ com.nodename.delaunay.SiteList.prototype = {
 			this._sorted = true;
 		}
 		var xmin, xmax, ymin, ymax;
-		if(this._sites.length == 0) return new as3.as3types.Rectangle(0,0,0,0);
+		if(this._sites.length == 0) return new as3.Rectangle(0,0,0,0);
 		xmin = Math.POSITIVE_INFINITY;
 		xmax = Math.NEGATIVE_INFINITY;
 		var _g = 0, _g1 = this._sites;
@@ -1822,7 +1838,7 @@ com.nodename.delaunay.SiteList.prototype = {
 		}
 		ymin = this._sites[0]._coord.y;
 		ymax = this._sites[this._sites.length - 1]._coord.y;
-		return new as3.as3types.Rectangle(xmin,ymin,xmax - xmin,ymax - ymin);
+		return new as3.Rectangle(xmin,ymin,xmax - xmin,ymax - ymin);
 	}
 	,siteColors: function(referenceImage) {
 		var colors = new Array();
@@ -1830,7 +1846,7 @@ com.nodename.delaunay.SiteList.prototype = {
 		while(_g < _g1.length) {
 			var site = _g1[_g];
 			++_g;
-			colors.push(referenceImage != null?as3.ac3core.BitmapDataCore.getPixel(referenceImage,site._coord.x | 0,site._coord.y | 0):site.color);
+			colors.push(referenceImage != null?as3.BitmapDataCore.getPixel(referenceImage,site._coord.x | 0,site._coord.y | 0):site.color);
 		}
 		return colors;
 	}
@@ -1867,7 +1883,7 @@ com.nodename.delaunay.SiteList.prototype = {
 		return regions;
 	}
 	,nearestSitePoint: function(proximityMap,x,y) {
-		var index = as3.ac3core.BitmapDataCore.getPixel(proximityMap,x,y);
+		var index = as3.BitmapDataCore.getPixel(proximityMap,x,y);
 		if(index > this._sites.length - 1) return null;
 		return this._sites[index]._coord;
 	}
@@ -2023,8 +2039,8 @@ com.nodename.delaunay.Voronoi.prototype = {
 		while(_g < points.length) {
 			var p = points[_g];
 			++_g;
-			if(h.exists(as3.ac3core.PointCore.hash(p))) throw "Duplicate points not supported yet!";
-			h.set(as3.ac3core.PointCore.hash(p),p);
+			if(h.exists(as3.PointCore.hash(p))) throw "Duplicate points not supported yet!";
+			h.set(as3.PointCore.hash(p),p);
 		}
 	}
 	,addSites: function(points,colors) {
@@ -2039,19 +2055,19 @@ com.nodename.delaunay.Voronoi.prototype = {
 		var weight = this._prng.nextDouble() * 100;
 		var site = com.nodename.delaunay.Site.create(p,index,weight,color);
 		this._sites.push(site);
-		this._sitesIndexedByLocation.set(as3.ac3core.PointCore.hash(p),site);
+		this._sitesIndexedByLocation.set(as3.PointCore.hash(p),site);
 	}
 	,edges: function() {
 		return this._edges;
 	}
 	,region: function(p) {
-		var site = this._sitesIndexedByLocation.get(as3.ac3core.PointCore.hash(p));
+		var site = this._sitesIndexedByLocation.get(as3.PointCore.hash(p));
 		if(site == null) return new Array();
 		return site.region(this.plotBounds);
 	}
 	,neighborSitesForSite: function(coord) {
 		var points = new Array();
-		var site = this._sitesIndexedByLocation.get(as3.ac3core.PointCore.hash(coord));
+		var site = this._sitesIndexedByLocation.get(as3.PointCore.hash(coord));
 		if(site == null) return points;
 		var sites = site.neighborSites();
 		var neighbor;
@@ -2262,8 +2278,8 @@ com.nodename.geom.LineSegment = $hxClasses["com.nodename.geom.LineSegment"] = fu
 };
 com.nodename.geom.LineSegment.__name__ = ["com","nodename","geom","LineSegment"];
 com.nodename.geom.LineSegment.compareLengths_MAX = function(segment0,segment1) {
-	var length0 = as3.ac3core.PointCore.distance(segment0.p0,segment0.p1);
-	var length1 = as3.ac3core.PointCore.distance(segment1.p0,segment1.p1);
+	var length0 = as3.PointCore.distance(segment0.p0,segment0.p1);
+	var length1 = as3.PointCore.distance(segment1.p0,segment1.p1);
 	if(length0 < length1) return 1;
 	if(length0 > length1) return -1;
 	return 0;
@@ -2685,8 +2701,8 @@ specs.AS3Spec = $hxClasses["specs.AS3Spec"] = function() {
 			var p1 = { x : 1.0, y : 1.0};
 			var p2 = { x : 1.0, y : 1.0};
 			var d = new Hash();
-			d.set(as3.ac3core.PointCore.hash(p1),p1);
-			d.set(as3.ac3core.PointCore.hash(p2),p2);
+			d.set(as3.PointCore.hash(p1),p1);
+			d.set(as3.PointCore.hash(p2),p2);
 			jasmine.J.expect(Lambda.count(d)).toEqual(2);
 		});
 	});
@@ -2707,18 +2723,6 @@ specs.ConversionCoreSpec = $hxClasses["specs.ConversionCoreSpec"] = function() {
 			jasmine.J.expect(false).toBeFalsy();
 			jasmine.J.expect(true).toBeTruthy();
 		});
-		jasmine.J.it("should make boolean from dynamic",function() {
-			jasmine.J.expect(false).toBeFalsy();
-			jasmine.J.expect(true).toBeTruthy();
-			jasmine.J.expect(false).toBeFalsy();
-			jasmine.J.expect(true).toBeTruthy();
-			var p = null;
-			jasmine.J.expect(p == null).toBeTruthy();
-			jasmine.J.expect(p != null).toBeFalsy();
-			p = { x : 0.0, y : 0.0};
-			jasmine.J.expect(p == null).toBeFalsy();
-			jasmine.J.expect(p != null).toBeTruthy();
-		});
 	});
 };
 specs.ConversionCoreSpec.__name__ = ["specs","ConversionCoreSpec"];
@@ -2731,21 +2735,22 @@ specs.MapSpec = $hxClasses["specs.MapSpec"] = function() {
 		var map = new voronoimap.Map({ width : 100.0, height : 100.0});
 		map.newIsland(voronoimap.IslandShape.makeRadial(1),1);
 		jasmine.J.it("should place points",function() {
-			map.go(0,1);
+			map.go0PlacePoints();
 			jasmine.J.expect(map.points.length).toBe(map.NUM_POINTS);
 		});
 		jasmine.J.it("should improve points",function() {
-			map.go(1,2);
+			map.go1ImprovePoints();
 			jasmine.J.expect(map.points.length).toBe(map.NUM_POINTS);
 		});
 		jasmine.J.it("should build a graph",function() {
-			map.go(2,3);
+			map.go2BuildGraph();
 			map.assignBiomes();
 			jasmine.J.expect(true).toBeTruthy();
 		});
 		jasmine.J.it("should add features",function() {
-			map.go(3,6);
-			map.assignBiomes();
+			map.go3AssignElevations();
+			map.go4AssignMoisture();
+			map.go5DecorateMap();
 			jasmine.J.expect(true).toBeTruthy();
 		});
 		jasmine.J.it("should add edges",function() {
@@ -2771,13 +2776,13 @@ specs.PointCoreSpec = $hxClasses["specs.PointCoreSpec"] = function() {
 		jasmine.J.it("should interpolate points",function() {
 			var a = { x : 0.0, y : 0.0};
 			var b = { x : 1.0, y : 1.0};
-			var i = as3.ac3core.PointCore.interpolate(a,b,0.5);
+			var i = as3.PointCore.interpolate(a,b,0.5);
 			jasmine.J.expect(i.x).toBe(0.5);
 			jasmine.J.expect(i.y).toBe(0.5);
-			var i1 = as3.ac3core.PointCore.interpolate(a,b,0.0);
+			var i1 = as3.PointCore.interpolate(a,b,0.0);
 			jasmine.J.expect(i1.x).toBe(0);
 			jasmine.J.expect(i1.y).toBe(0);
-			var i2 = as3.ac3core.PointCore.interpolate(a,b,1.0);
+			var i2 = as3.PointCore.interpolate(a,b,1.0);
 			jasmine.J.expect(i2.x).toBe(1);
 			jasmine.J.expect(i2.y).toBe(1);
 		});
@@ -2814,7 +2819,7 @@ specs.VoronoiSpec = $hxClasses["specs.VoronoiSpec"] = function() {
 				var p = { x : x, y : y};
 				points.push(p);
 			}
-			var v = new com.nodename.delaunay.Voronoi(points,null,new as3.as3types.Rectangle(0,0,100,100));
+			var v = new com.nodename.delaunay.Voronoi(points,null,new as3.Rectangle(0,0,100,100));
 			jasmine.J.expect(v).not.toBeNull();
 		});
 	});
@@ -2836,7 +2841,7 @@ voronoimap.IslandShape.makeRadial = function(seed,islandFactor) {
 	var dipWidth = islandRandom.nextDoubleRange(0.2,0.7);
 	var inside = function(q) {
 		var angle = Math.atan2(q.y,q.x);
-		var length = 0.5 * (Math.max(Math.abs(q.x),Math.abs(q.y)) + as3.ac3core.PointCore.distanceFromOrigin(q));
+		var length = 0.5 * (Math.max(Math.abs(q.x),Math.abs(q.y)) + as3.PointCore.distanceFromOrigin(q));
 		var r1 = 0.5 + 0.40 * Math.sin(startAngle + bumps * angle + Math.cos((bumps + 3) * angle));
 		var r2 = 0.7 - 0.20 * Math.sin(startAngle + bumps * angle - Math.sin((bumps + 2) * angle));
 		if(Math.abs(angle - dipAngle) < dipWidth || Math.abs(angle - dipAngle + 2 * Math.PI) < dipWidth || Math.abs(angle - dipAngle - 2 * Math.PI) < dipWidth) r1 = r2 = 0.2;
@@ -2852,7 +2857,7 @@ voronoimap.IslandShape.makePerlin = function(seed,oceanRatio) {
 	var perlin = co.janicek.core.math.PerlinNoise.makePerlinNoise(256,256,1.0,1.0,1.0,seed,8);
 	return function(q) {
 		var c = (co.janicek.core.array.Array2dCore.get(perlin,(q.x + 1) * 128 | 0,(q.y + 1) * 128 | 0) & 255) / 255.0;
-		return c > oceanRatio + oceanRatio * as3.ac3core.PointCore.distanceFromOrigin(q) * as3.ac3core.PointCore.distanceFromOrigin(q);
+		return c > oceanRatio + oceanRatio * as3.PointCore.distanceFromOrigin(q) * as3.PointCore.distanceFromOrigin(q);
 	};
 }
 voronoimap.IslandShape.makeSquare = function() {
@@ -2862,9 +2867,9 @@ voronoimap.IslandShape.makeSquare = function() {
 }
 voronoimap.IslandShape.makeBlob = function() {
 	return function(q) {
-		var eye1 = as3.ac3core.PointCore.distanceFromOrigin({ x : q.x - 0.2, y : q.y / 2 + 0.2}) < 0.05;
-		var eye2 = as3.ac3core.PointCore.distanceFromOrigin({ x : q.x + 0.2, y : q.y / 2 + 0.2}) < 0.05;
-		var body = as3.ac3core.PointCore.distanceFromOrigin(q) < 0.8 - 0.18 * Math.sin(5 * Math.atan2(q.y,q.x));
+		var eye1 = as3.PointCore.distanceFromOrigin({ x : q.x - 0.2, y : q.y / 2 + 0.2}) < 0.05;
+		var eye2 = as3.PointCore.distanceFromOrigin({ x : q.x + 0.2, y : q.y / 2 + 0.2}) < 0.05;
+		var body = as3.PointCore.distanceFromOrigin(q) < 0.8 - 0.18 * Math.sin(5 * Math.atan2(q.y,q.x));
 		return body && !eye1 && !eye2;
 	};
 }
@@ -2874,6 +2879,11 @@ voronoimap.IslandShape.makeBitmap = function(bitmap) {
 		var x = (q.x + 1) / 2 * dimensions.x;
 		var y = (q.y + 1) / 2 * dimensions.y;
 		return co.janicek.core.array.Array2dCore.get(bitmap,x | 0,y | 0);
+	};
+}
+voronoimap.IslandShape.makeNoise = function(seed) {
+	return function(q) {
+		return (seed = seed * 16807.0 % 2147483647.0) / 2147483647.0 > 0.5;
 	};
 }
 voronoimap.IslandShape.prototype = {
@@ -2891,7 +2901,7 @@ voronoimap.Lava.prototype = {
 		while(_g < _g1.length) {
 			var edge1 = _g1[_g];
 			++_g;
-			if(!as3.ac3core.ConversionCore.booleanFromInt(edge1.river) && !edge1.d0.water && !edge1.d1.water && edge1.d0.elevation > 0.8 && edge1.d1.elevation > 0.8 && edge1.d0.moisture < 0.3 && edge1.d1.moisture < 0.3 && randomDouble() < voronoimap.Lava.FRACTION_LAVA_FISSURES) this.lava[edge1.index] = true;
+			if(!as3.ConversionCore.booleanFromInt(edge1.river) && !edge1.d0.water && !edge1.d1.water && edge1.d0.elevation > 0.8 && edge1.d1.elevation > 0.8 && edge1.d0.moisture < 0.3 && edge1.d1.moisture < 0.3 && randomDouble() < voronoimap.Lava.FRACTION_LAVA_FISSURES) this.lava[edge1.index] = true;
 		}
 	}
 	,__class__: voronoimap.Lava
@@ -2980,55 +2990,43 @@ voronoimap.Map.prototype = {
 		if(this.centers == null) this.centers = new Array();
 		if(this.corners == null) this.corners = new Array();
 	}
-	,go: function(first,last) {
-		var me = this;
-		var stages = [];
-		var timeIt = function(name,fn) {
-			fn();
-		};
-		stages.push(["Place points...",function() {
-			me.reset();
-			me.points = me.generateRandomPoints();
-		}]);
-		stages.push(["Improve points...",function() {
-			me.improveRandomPoints(me.points);
-		}]);
-		stages.push(["Build graph...",function() {
-			var voronoi = new com.nodename.delaunay.Voronoi(me.points,null,new as3.as3types.Rectangle(0,0,me.SIZE.width,me.SIZE.height));
-			me.buildGraph(me.points,voronoi);
-			me.improveCorners();
-			voronoi.dispose();
-			voronoi = null;
-			me.points = null;
-		}]);
-		stages.push(["Assign elevations...",function() {
-			me.assignCornerElevations();
-			me.assignOceanCoastAndLand();
-			me.redistributeElevations(me.landCorners(me.corners));
-			var _g = 0, _g1 = me.corners;
-			while(_g < _g1.length) {
-				var q = _g1[_g];
-				++_g;
-				if(q.ocean || q.coast) q.elevation = 0.0;
-			}
-			me.assignPolygonElevations();
-		}]);
-		stages.push(["Assign moisture...",function() {
-			me.calculateDownslopes();
-			me.calculateWatersheds();
-			me.createRivers(me.RIVER_CHANCE);
-			me.assignCornerMoisture();
-			me.redistributeMoisture(me.landCorners(me.corners));
-			me.assignPolygonMoisture();
-		}]);
-		stages.push(["Decorate map...",function() {
-			me.assignBiomes();
-		}]);
-		var _g = first;
-		while(_g < last) {
-			var i = _g++;
-			timeIt(stages[i][0],stages[i][1]);
+	,go0PlacePoints: function() {
+		this.reset();
+		this.points = this.generateRandomPoints();
+	}
+	,go1ImprovePoints: function() {
+		this.improveRandomPoints(this.points);
+	}
+	,go2BuildGraph: function() {
+		var voronoi = new com.nodename.delaunay.Voronoi(this.points,null,new as3.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
+		this.buildGraph(this.points,voronoi);
+		this.improveCorners();
+		voronoi.dispose();
+		voronoi = null;
+		this.points = null;
+	}
+	,go3AssignElevations: function() {
+		this.assignCornerElevations();
+		this.assignOceanCoastAndLand();
+		this.redistributeElevations(this.landCorners(this.corners));
+		var _g = 0, _g1 = this.corners;
+		while(_g < _g1.length) {
+			var q = _g1[_g];
+			++_g;
+			if(q.ocean || q.coast) q.elevation = 0.0;
 		}
+		this.assignPolygonElevations();
+	}
+	,go4AssignMoisture: function() {
+		this.calculateDownslopes();
+		this.calculateWatersheds();
+		this.createRivers(this.RIVER_CHANCE);
+		this.assignCornerMoisture();
+		this.redistributeMoisture(this.landCorners(this.corners));
+		this.assignPolygonMoisture();
+	}
+	,go5DecorateMap: function() {
+		this.assignBiomes();
 	}
 	,generateRandomPoints: function() {
 		var p, i, points = new Array();
@@ -3045,7 +3043,7 @@ voronoimap.Map.prototype = {
 		var _g1 = 0, _g = this.NUM_LLOYD_ITERATIONS;
 		while(_g1 < _g) {
 			var i1 = _g1++;
-			voronoi = new com.nodename.delaunay.Voronoi(points,null,new as3.as3types.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
+			voronoi = new com.nodename.delaunay.Voronoi(points,null,new as3.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
 			var _g2 = 0;
 			while(_g2 < points.length) {
 				var p1 = points[_g2];
@@ -3097,7 +3095,7 @@ voronoimap.Map.prototype = {
 		while(_g < _g1.length) {
 			var edge1 = _g1[_g];
 			++_g;
-			if(edge1.v0 != null && edge1.v1 != null) edge1.midpoint = as3.ac3core.PointCore.interpolate(edge1.v0.point,edge1.v1.point,0.5);
+			if(edge1.v0 != null && edge1.v1 != null) edge1.midpoint = as3.PointCore.interpolate(edge1.v0.point,edge1.v1.point,0.5);
 		}
 	}
 	,landCorners: function(corners) {
@@ -3126,7 +3124,7 @@ voronoimap.Map.prototype = {
 			p.borders = new Array();
 			p.corners = new Array();
 			this.centers.push(p);
-			centerLookup.set(as3.ac3core.PointCore.hash(point1),p);
+			centerLookup.set(as3.PointCore.hash(point1),p);
 		}
 		var _g = 0, _g1 = this.centers;
 		while(_g < _g1.length) {
@@ -3176,11 +3174,11 @@ voronoimap.Map.prototype = {
 			edge.index = this.edges.length;
 			edge.river = 0;
 			this.edges.push(edge);
-			edge.midpoint = vedge.p0 != null && vedge.p1 != null?as3.ac3core.PointCore.interpolate(vedge.p0,vedge.p1,0.5):null;
+			edge.midpoint = vedge.p0 != null && vedge.p1 != null?as3.PointCore.interpolate(vedge.p0,vedge.p1,0.5):null;
 			edge.v0 = makeCorner(vedge.p0);
 			edge.v1 = makeCorner(vedge.p1);
-			edge.d0 = centerLookup.get(as3.ac3core.PointCore.hash(dedge.p0));
-			edge.d1 = centerLookup.get(as3.ac3core.PointCore.hash(dedge.p1));
+			edge.d0 = centerLookup.get(as3.PointCore.hash(dedge.p0));
+			edge.d1 = centerLookup.get(as3.PointCore.hash(dedge.p1));
 			if(edge.d0 != null) edge.d0.borders.push(edge);
 			if(edge.d1 != null) edge.d1.borders.push(edge);
 			if(edge.v0 != null) edge.v0.protrudes.push(edge);
@@ -3526,19 +3524,19 @@ voronoimap.NoisyEdges.buildNoisyLineSegments = function(random,A,B,C,D,minLength
 		var $r;
 		var subdivide1 = null;
 		subdivide1 = function(A1,B1,C1,D1) {
-			if(as3.ac3core.PointCore.distanceFromOrigin({ x : A1.x - C1.x, y : A1.y - C1.y}) < minLength || as3.ac3core.PointCore.distanceFromOrigin({ x : B1.x - D1.x, y : B1.y - D1.y}) < minLength) return;
+			if(as3.PointCore.distanceFromOrigin({ x : A1.x - C1.x, y : A1.y - C1.y}) < minLength || as3.PointCore.distanceFromOrigin({ x : B1.x - D1.x, y : B1.y - D1.y}) < minLength) return;
 			var p = random.nextDoubleRange(0.2,0.8);
 			var q = random.nextDoubleRange(0.2,0.8);
-			var E = as3.ac3core.PointCore.interpolate(A1,D1,p);
-			var F = as3.ac3core.PointCore.interpolate(B1,C1,p);
-			var G = as3.ac3core.PointCore.interpolate(A1,B1,q);
-			var I = as3.ac3core.PointCore.interpolate(D1,C1,q);
-			var H = as3.ac3core.PointCore.interpolate(E,F,q);
+			var E = as3.PointCore.interpolate(A1,D1,p);
+			var F = as3.PointCore.interpolate(B1,C1,p);
+			var G = as3.PointCore.interpolate(A1,B1,q);
+			var I = as3.PointCore.interpolate(D1,C1,q);
+			var H = as3.PointCore.interpolate(E,F,q);
 			var s = 1.0 - random.nextDoubleRange(-0.4,0.4);
 			var t = 1.0 - random.nextDoubleRange(-0.4,0.4);
-			subdivide1(A1,as3.ac3core.PointCore.interpolate(G,B1,s),H,as3.ac3core.PointCore.interpolate(E,D1,t));
+			subdivide1(A1,as3.PointCore.interpolate(G,B1,s),H,as3.PointCore.interpolate(E,D1,t));
 			points.push(H);
-			subdivide1(H,as3.ac3core.PointCore.interpolate(F,C1,s),C1,as3.ac3core.PointCore.interpolate(I,D1,t));
+			subdivide1(H,as3.PointCore.interpolate(F,C1,s),C1,as3.PointCore.interpolate(I,D1,t));
 		};
 		$r = subdivide1;
 		return $r;
@@ -3563,15 +3561,15 @@ voronoimap.NoisyEdges.prototype = {
 				++_g2;
 				if(edge1.d0 != null && edge1.d1 != null && edge1.v0 != null && edge1.v1 != null && this.path0[edge1.index] == null) {
 					var f = voronoimap.NoisyEdges.NOISY_LINE_TRADEOFF;
-					var t = as3.ac3core.PointCore.interpolate(edge1.v0.point,edge1.d0.point,f);
-					var q = as3.ac3core.PointCore.interpolate(edge1.v0.point,edge1.d1.point,f);
-					var r = as3.ac3core.PointCore.interpolate(edge1.v1.point,edge1.d0.point,f);
-					var s = as3.ac3core.PointCore.interpolate(edge1.v1.point,edge1.d1.point,f);
+					var t = as3.PointCore.interpolate(edge1.v0.point,edge1.d0.point,f);
+					var q = as3.PointCore.interpolate(edge1.v0.point,edge1.d1.point,f);
+					var r = as3.PointCore.interpolate(edge1.v1.point,edge1.d0.point,f);
+					var s = as3.PointCore.interpolate(edge1.v1.point,edge1.d1.point,f);
 					var minLength = 10;
 					if(edge1.d0.biome != edge1.d1.biome) minLength = 3;
 					if(edge1.d0.ocean && edge1.d1.ocean) minLength = 100;
 					if(edge1.d0.coast || edge1.d1.coast) minLength = 1;
-					if(as3.ac3core.ConversionCore.booleanFromInt(edge1.river) || lava.lava[edge1.index] != null) minLength = 1;
+					if(as3.ConversionCore.booleanFromInt(edge1.river) || lava.lava[edge1.index] != null) minLength = 1;
 					this.path0[edge1.index] = voronoimap.NoisyEdges.buildNoisyLineSegments(random,edge1.v0.point,t,edge1.midpoint,q,minLength);
 					this.path1[edge1.index] = voronoimap.NoisyEdges.buildNoisyLineSegments(random,edge1.v1.point,s,edge1.midpoint,r,minLength);
 				}
@@ -3609,9 +3607,9 @@ voronoimap.Roads.prototype = {
 			while(_g < _g1.length) {
 				var r1 = _g1[_g];
 				++_g;
-				newLevel = centerContour[p.index] == null?0:centerContour[p.index];
+				newLevel = co.janicek.core.NullCore.coalesce(centerContour[p.index],0);
 				while(r1.elevation > elevationThresholds[newLevel] && !r1.water) newLevel += 1;
-				if(newLevel < (centerContour[r1.index] == null?999:centerContour[r1.index])) {
+				if(newLevel < co.janicek.core.NullCore.coalesce(centerContour[r1.index],999)) {
 					centerContour[r1.index] = newLevel;
 					queue.push(r1);
 				}
@@ -3625,7 +3623,7 @@ voronoimap.Roads.prototype = {
 			while(_g2 < _g3.length) {
 				var q1 = _g3[_g2];
 				++_g2;
-				cornerContour[q1.index] = Math.min(cornerContour[q1.index] == null?999:cornerContour[q1.index],centerContour[p1.index] == null?999:cornerContour[q1.index]) | 0;
+				cornerContour[q1.index] = Math.min(co.janicek.core.NullCore.coalesce(cornerContour[q1.index],999),co.janicek.core.NullCore.coalesce(centerContour[p1.index],999)) | 0;
 			}
 		}
 		var _g = 0, _g1 = map.centers;
@@ -3811,8 +3809,8 @@ js.Boot.__init();
 		};
 	}
 }
-as3.ac3core.NumberCore.MIN_VALUE = 5 * Math.pow(10,-324);
-as3.ac3core.NumberCore.MAX_VALUE = 1.7976931348623157 * Math.pow(10,308);
+as3.NumberCore.MIN_VALUE = 5 * Math.pow(10,-324);
+as3.NumberCore.MAX_VALUE = 1.7976931348623157 * Math.pow(10,308);
 co.janicek.core.math.MathCore.INT32_MAX = 2147483647;
 co.janicek.core.math.PerlinNoise.p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
 co.janicek.core.math.RandomCore.MPM = 2147483647.0;

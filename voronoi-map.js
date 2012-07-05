@@ -150,12 +150,6 @@ as3.ConversionCore.intFromBoolean = function(b) {
 as3.ConversionCore.booleanFromInt = function(i) {
 	return i == null?false:i > 0;
 }
-as3.ConversionCore.isNull = function(d) {
-	return d == null;
-}
-as3.ConversionCore.isNotNull = function(d) {
-	return d != null;
-}
 as3.ConversionCore.prototype = {
 	__class__: as3.ConversionCore
 }
@@ -219,13 +213,23 @@ as3.Matrix.prototype = {
 as3.PointCore = $hxClasses["as3.PointCore"] = function() { }
 as3.PointCore.__name__ = ["as3","PointCore"];
 as3.PointCore.distanceFromOrigin = function(p) {
-	return as3.PointCore.distance({ x : 0.0, y : 0.0},p);
+	return Math.sqrt(p.x * p.x + p.y * p.y);
 }
 as3.PointCore.distance = function(a,b) {
 	return Math.sqrt(Math.pow(a.x - b.x,2) + Math.pow(a.y - b.y,2));
 }
 as3.PointCore.interpolate = function(pt1,pt2,f) {
 	return { x : (pt1.x - pt2.x) * f + pt2.x, y : (pt1.y - pt2.y) * f + pt2.y};
+}
+as3.PointCore.normalize = function(p,thickness) {
+	if(p.x == 0 && p.y == 0) p.x = thickness; else {
+		var norm = thickness / Math.sqrt(p.x * p.x + p.y * p.y);
+		p.x *= norm;
+		p.y *= norm;
+	}
+}
+as3.PointCore.add = function(p1,p2) {
+	return { x : p2.x + p1.x, y : p2.y + p1.y};
 }
 as3.PointCore.subtract = function(p0,p1) {
 	return { x : p0.x - p1.x, y : p0.y - p1.y};
@@ -341,6 +345,20 @@ as3.Vector3D.prototype = {
 var co = co || {}
 if(!co.janicek) co.janicek = {}
 if(!co.janicek.core) co.janicek.core = {}
+co.janicek.core.NullCore = $hxClasses["co.janicek.core.NullCore"] = function() { }
+co.janicek.core.NullCore.__name__ = ["co","janicek","core","NullCore"];
+co.janicek.core.NullCore.isNull = function(nullable) {
+	return nullable == null;
+}
+co.janicek.core.NullCore.isNotNull = function(nullable) {
+	return nullable != null;
+}
+co.janicek.core.NullCore.coalesce = function(nullable,defaultValue) {
+	return nullable == null?defaultValue:nullable;
+}
+co.janicek.core.NullCore.prototype = {
+	__class__: co.janicek.core.NullCore
+}
 co.janicek.core.StringCore = $hxClasses["co.janicek.core.StringCore"] = function() { }
 co.janicek.core.StringCore.__name__ = ["co","janicek","core","StringCore"];
 co.janicek.core.StringCore.contains = function(string,pattern) {
@@ -531,6 +549,9 @@ co.janicek.core.html.HtmlColorCore.colorFraction = function(fraction) {
 }
 co.janicek.core.html.HtmlColorCore.intToHexColor = function(color) {
 	return "#" + StringTools.hex(color,6);
+}
+co.janicek.core.html.HtmlColorCore.rgba = function(red,green,blue,alpha) {
+	return "rgba(" + red + "," + green + "," + blue + "," + alpha + ")";
 }
 co.janicek.core.html.HtmlColorCore.prototype = {
 	__class__: co.janicek.core.html.HtmlColorCore
@@ -2196,7 +2217,7 @@ voronoimap.Main.initializeUi = function() {
 		}
 	});
 	new js.JQuery("#imageFile").change(function(e) {
-		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 90, className : "voronoimap.Main", methodName : "initializeUi"});
+		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 93, className : "voronoimap.Main", methodName : "initializeUi"});
 		var fileUpload = new js.JQuery("#imageFile").get()[0];
 		var files = fileUpload.files;
 		if(files.length == 1) {
@@ -2264,7 +2285,7 @@ voronoimap.Main.generate = function() {
 	switch(islandShape) {
 	case "bitmap":
 		var imageData = co.janicek.core.html.CanvasCore.getImageData(voronoimap.Main.image);
-		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 172, className : "voronoimap.Main", methodName : "generate"});
+		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 175, className : "voronoimap.Main", methodName : "generate"});
 		var bitmap = co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap(imageData,Std.parseInt(new js.JQuery("#imageThreshold").val()));
 		if(new js.JQuery("#invertImage")["is"](":checked")) bitmap = co.janicek.core.html.CanvasCore.invertBitmap(bitmap);
 		map.newIsland(voronoimap.IslandShape.makeBitmap(bitmap),seed);
@@ -2285,22 +2306,26 @@ voronoimap.Main.generate = function() {
 		map.newIsland(voronoimap.IslandShape.makeSquare(),seed);
 		break;
 	}
+	var watersheds = new voronoimap.Watersheds();
 	var noisyEdges = new voronoimap.NoisyEdges();
 	var lava = new voronoimap.Lava();
+	var roads = new voronoimap.Roads();
 	map.go0PlacePoints();
 	map.go1ImprovePoints();
 	map.go2BuildGraph();
 	map.go3AssignElevations();
 	map.go4AssignMoisture();
 	map.go5DecorateMap();
+	roads.createRoads(map);
+	watersheds.createWatersheds(map);
 	noisyEdges.buildNoisyEdges(map,lava,new de.polygonal.math.PM_PRNG());
-	voronoimap.Main.render(map,noisyEdges,lava);
+	voronoimap.Main.render(map,noisyEdges,lava,watersheds,roads);
 }
 voronoimap.Main.getIntegerOrStringSeed = function(s) {
 	if(co.janicek.core.StringCore.isInteger(s)) return Std.parseInt(s);
 	return Math.abs(co.janicek.core.math.RandomCore.stringToSeed(s)) | 0;
 }
-voronoimap.Main.render = function(map,noisyEdges,lava) {
+voronoimap.Main.render = function(map,noisyEdges,lava,watersheds,roads) {
 	var c = voronoimap.Main.getContext();
 	voronoimap.html.CanvasRender.graphicsReset(c,map.SIZE.width | 0,map.SIZE.height | 0,voronoimap.html.Style.displayColors);
 	switch(new js.JQuery("#view").val()) {
@@ -2309,9 +2334,11 @@ voronoimap.Main.render = function(map,noisyEdges,lava) {
 		break;
 	case "smooth":
 		voronoimap.html.CanvasRender.renderPolygons(c,voronoimap.html.Style.displayColors,null,voronoimap.html.CanvasRender.colorWithSlope,map,noisyEdges);
-		voronoimap.html.CanvasRender.renderEdges(c,voronoimap.html.Style.displayColors,map,noisyEdges,lava);
+		voronoimap.html.CanvasRender.renderEdges(c,voronoimap.html.Style.displayColors,map,noisyEdges,lava,new js.JQuery("#viewRivers")["is"](":checked"));
 		break;
 	}
+	if(new js.JQuery("#viewRoads")["is"](":checked")) voronoimap.html.CanvasRender.renderRoads(c,map,roads,voronoimap.html.Style.displayColors);
+	if(new js.JQuery("#viewWatersheds")["is"](":checked")) voronoimap.html.CanvasRender.renderWatersheds(c,map,watersheds);
 	if(new js.JQuery("#addNoise")["is"](":checked")) co.janicek.core.html.CanvasCore.addNoiseToCanvas(c,666,10,true);
 }
 voronoimap.Main.prototype = {
@@ -2989,6 +3016,99 @@ voronoimap.NoisyEdges.prototype = {
 	}
 	,__class__: voronoimap.NoisyEdges
 }
+voronoimap.Roads = $hxClasses["voronoimap.Roads"] = function() {
+	this.road = [];
+	this.roadConnections = [];
+};
+voronoimap.Roads.__name__ = ["voronoimap","Roads"];
+voronoimap.Roads.prototype = {
+	road: null
+	,roadConnections: null
+	,createRoads: function(map) {
+		var queue = [];
+		var p, q, r, edge, newLevel;
+		var elevationThresholds = [0,0.05,0.37,0.64];
+		var cornerContour = [];
+		var centerContour = [];
+		var _g = 0, _g1 = map.centers;
+		while(_g < _g1.length) {
+			var p1 = _g1[_g];
+			++_g;
+			if(p1.coast || p1.ocean) {
+				centerContour[p1.index] = 1;
+				queue.push(p1);
+			}
+		}
+		while(queue.length > 0) {
+			p = queue.shift();
+			var _g = 0, _g1 = p.neighbors;
+			while(_g < _g1.length) {
+				var r1 = _g1[_g];
+				++_g;
+				newLevel = co.janicek.core.NullCore.coalesce(centerContour[p.index],0);
+				while(r1.elevation > elevationThresholds[newLevel] && !r1.water) newLevel += 1;
+				if(newLevel < co.janicek.core.NullCore.coalesce(centerContour[r1.index],999)) {
+					centerContour[r1.index] = newLevel;
+					queue.push(r1);
+				}
+			}
+		}
+		var _g = 0, _g1 = map.centers;
+		while(_g < _g1.length) {
+			var p1 = _g1[_g];
+			++_g;
+			var _g2 = 0, _g3 = p1.corners;
+			while(_g2 < _g3.length) {
+				var q1 = _g3[_g2];
+				++_g2;
+				cornerContour[q1.index] = Math.min(co.janicek.core.NullCore.coalesce(cornerContour[q1.index],999),co.janicek.core.NullCore.coalesce(centerContour[p1.index],999)) | 0;
+			}
+		}
+		var _g = 0, _g1 = map.centers;
+		while(_g < _g1.length) {
+			var p1 = _g1[_g];
+			++_g;
+			var _g2 = 0, _g3 = p1.borders;
+			while(_g2 < _g3.length) {
+				var edge1 = _g3[_g2];
+				++_g2;
+				if(edge1.v0 != null && edge1.v1 != null && cornerContour[edge1.v0.index] != cornerContour[edge1.v1.index]) {
+					this.road[edge1.index] = Math.min(cornerContour[edge1.v0.index],cornerContour[edge1.v1.index]) | 0;
+					if(this.roadConnections[p1.index] == null) this.roadConnections[p1.index] = new Array();
+					this.roadConnections[p1.index].push(edge1);
+				}
+			}
+		}
+	}
+	,__class__: voronoimap.Roads
+}
+voronoimap.Watersheds = $hxClasses["voronoimap.Watersheds"] = function() {
+	this.lowestCorner = [];
+	this.watersheds = [];
+};
+voronoimap.Watersheds.__name__ = ["voronoimap","Watersheds"];
+voronoimap.Watersheds.prototype = {
+	lowestCorner: null
+	,watersheds: null
+	,createWatersheds: function(map) {
+		var p, q, s;
+		var _g = 0, _g1 = map.centers;
+		while(_g < _g1.length) {
+			var p1 = _g1[_g];
+			++_g;
+			s = null;
+			var _g2 = 0, _g3 = p1.corners;
+			while(_g2 < _g3.length) {
+				var q1 = _g3[_g2];
+				++_g2;
+				if(s == null || q1.elevation < s.elevation) s = q1;
+			}
+			this.lowestCorner[p1.index] = s == null?-1:s.index;
+			this.watersheds[p1.index] = s == null?-1:s.watershed == null?-1:s.watershed.index;
+		}
+	}
+	,__class__: voronoimap.Watersheds
+}
 if(!voronoimap.graph) voronoimap.graph = {}
 voronoimap.graph.Center = $hxClasses["voronoimap.graph.Center"] = function() {
 };
@@ -3150,6 +3270,41 @@ voronoimap.html.CanvasRender.renderDebugPolygons = function(context,map,displayC
 		}
 	}
 }
+voronoimap.html.CanvasRender.renderWatersheds = function(graphics,map,watersheds) {
+	var edge, w0, w1;
+	var _g = 0, _g1 = map.edges;
+	while(_g < _g1.length) {
+		var edge1 = _g1[_g];
+		++_g;
+		if(edge1.d0 != null && edge1.d1 != null && edge1.v0 != null && edge1.v1 != null && !edge1.d0.ocean && !edge1.d1.ocean) {
+			w0 = watersheds.watersheds[edge1.d0.index];
+			w1 = watersheds.watersheds[edge1.d1.index];
+			if(w0 != w1) {
+				graphics.beginPath();
+				graphics.lineWidth = 3.5;
+				graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.rgba(0,0,0,0.1 * Math.sqrt(co.janicek.core.NullCore.coalesce(map.corners[w0].watershed_size,1) + co.janicek.core.NullCore.coalesce(map.corners[w1].watershed.watershed_size,1)));
+				graphics.moveTo(edge1.v0.point.x,edge1.v0.point.y);
+				graphics.lineTo(edge1.v1.point.x,edge1.v1.point.y);
+				graphics.closePath();
+				graphics.stroke();
+			}
+		}
+	}
+	var _g = 0, _g1 = map.edges;
+	while(_g < _g1.length) {
+		var edge1 = _g1[_g];
+		++_g;
+		if(as3.ConversionCore.booleanFromInt(edge1.river)) {
+			graphics.beginPath();
+			graphics.lineWidth = 1.0;
+			graphics.strokeStyle = "#6699ff";
+			graphics.moveTo(edge1.v0.point.x,edge1.v0.point.y);
+			graphics.lineTo(edge1.v1.point.x,edge1.v1.point.y);
+			graphics.closePath();
+			graphics.stroke();
+		}
+	}
+}
 voronoimap.html.CanvasRender.renderPolygons = function(graphics,colors,gradientFillProperty,colorOverrideFunction,map,noisyEdges) {
 	var p, r;
 	graphics.fillStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(colors.OCEAN);
@@ -3211,7 +3366,78 @@ voronoimap.html.CanvasRender.drawPathForwards = function(graphics,path) {
 		graphics.lineTo(path[i].x,path[i].y);
 	}
 }
-voronoimap.html.CanvasRender.renderEdges = function(graphics,colors,map,noisyEdges,lava) {
+voronoimap.html.CanvasRender.renderRoads = function(graphics,map,roads,colors) {
+	var p, A, B, C;
+	var i, j, d, edge1, edge2, edges;
+	var normalTowards = function(e,c,len) {
+		var n = { x : -(e.v1.point.y - e.v0.point.y), y : e.v1.point.x - e.v0.point.x};
+		var d1 = as3.PointCore.subtract(c,e.midpoint);
+		if(n.x * d1.x + n.y * d1.y < 0) {
+			n.x = -n.x;
+			n.y = -n.y;
+		}
+		as3.PointCore.normalize(n,len);
+		return n;
+	};
+	var _g = 0, _g1 = map.centers;
+	while(_g < _g1.length) {
+		var p1 = _g1[_g];
+		++_g;
+		if(roads.roadConnections[p1.index] != null) {
+			if(roads.roadConnections[p1.index].length == 2) {
+				edges = p1.borders;
+				var _g3 = 0, _g2 = edges.length;
+				while(_g3 < _g2) {
+					var i1 = _g3++;
+					edge1 = edges[i1];
+					if(roads.road[edge1.index] > 0) {
+						var _g5 = i1 + 1, _g4 = edges.length;
+						while(_g5 < _g4) {
+							var j1 = _g5++;
+							edge2 = edges[j1];
+							if(roads.road[edge2.index] > 0) {
+								d = 0.5 * Math.min(as3.PointCore.distanceFromOrigin(as3.PointCore.subtract(edge1.midpoint,p1.point)),as3.PointCore.distanceFromOrigin(as3.PointCore.subtract(edge2.midpoint,p1.point)));
+								A = as3.PointCore.add(normalTowards(edge1,p1.point,d),edge1.midpoint);
+								B = as3.PointCore.add(normalTowards(edge2,p1.point,d),edge2.midpoint);
+								C = as3.PointCore.interpolate(A,B,0.5);
+								graphics.beginPath();
+								graphics.lineWidth = 1.1;
+								graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(Reflect.field(colors,"ROAD" + roads.road[edge1.index]));
+								graphics.moveTo(edge1.midpoint.x,edge1.midpoint.y);
+								graphics.quadraticCurveTo(A.x,A.y,C.x,C.y);
+								graphics.moveTo(C.x,C.y);
+								graphics.lineWidth = 1.1;
+								graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(Reflect.field(colors,"ROAD" + roads.road[edge2.index]));
+								graphics.quadraticCurveTo(B.x,B.y,edge2.midpoint.x,edge2.midpoint.y);
+								graphics.stroke();
+								graphics.closePath();
+							}
+						}
+					}
+				}
+			} else {
+				var _g2 = 0, _g3 = p1.borders;
+				while(_g2 < _g3.length) {
+					var edge11 = _g3[_g2];
+					++_g2;
+					if(roads.road[edge11.index] > 0) {
+						d = 0.25 * as3.PointCore.distanceFromOrigin(as3.PointCore.subtract(edge11.midpoint,p1.point));
+						A = as3.PointCore.add(normalTowards(edge11,p1.point,d),edge11.midpoint);
+						graphics.beginPath();
+						graphics.lineWidth = 1.4;
+						graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(Reflect.field(colors,"ROAD" + roads.road[edge11.index]));
+						graphics.moveTo(edge11.midpoint.x,edge11.midpoint.y);
+						graphics.quadraticCurveTo(A.x,A.y,p1.point.x,p1.point.y);
+						graphics.stroke();
+						graphics.closePath();
+					}
+				}
+			}
+		}
+	}
+}
+voronoimap.html.CanvasRender.renderEdges = function(graphics,colors,map,noisyEdges,lava,renderRivers) {
+	if(renderRivers == null) renderRivers = true;
 	var p, r, edge;
 	var _g = 0, _g1 = map.centers;
 	while(_g < _g1.length) {
@@ -3232,7 +3458,7 @@ voronoimap.html.CanvasRender.renderEdges = function(graphics,colors,map,noisyEdg
 			} else if(p1.water || r1.water) continue; else if(lava.lava[edge.index]) {
 				graphics.lineWidth = 1;
 				graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(colors.LAVA);
-			} else if(edge.river > 0) {
+			} else if(edge.river > 0 && renderRivers) {
 				graphics.lineWidth = Math.sqrt(edge.river);
 				graphics.strokeStyle = co.janicek.core.html.HtmlColorCore.intToHexColor(colors.RIVER);
 			} else continue;
@@ -3423,8 +3649,8 @@ voronoimap.Html.S_fields = "#fields";
 voronoimap.Html.S_generate = "#generate";
 voronoimap.Html.S_height = "#height";
 voronoimap.Html.S_imageFile = "#imageFile";
-voronoimap.Html.S_imageThumb = "#imageThumb";
 voronoimap.Html.S_imageThreshold = "#imageThreshold";
+voronoimap.Html.S_imageThumb = "#imageThumb";
 voronoimap.Html.S_invertImage = "#invertImage";
 voronoimap.Html.S_islandFactor = "#islandFactor";
 voronoimap.Html.S_islandShape = "#islandShape";
@@ -3439,6 +3665,9 @@ voronoimap.Html.S_shapeRandom = "#shapeRandom";
 voronoimap.Html.S_shapeSeed = "#shapeSeed";
 voronoimap.Html.S_toggle = "#toggle";
 voronoimap.Html.S_view = "#view";
+voronoimap.Html.S_viewRivers = "#viewRivers";
+voronoimap.Html.S_viewRoads = "#viewRoads";
+voronoimap.Html.S_viewWatersheds = "#viewWatersheds";
 voronoimap.Html.S_width = "#width";
 voronoimap.NoisyEdges.NOISY_LINE_TRADEOFF = 0.5;
 voronoimap.html.CanvasRender.lightVector = new as3.Vector3D(-1,-1,0);

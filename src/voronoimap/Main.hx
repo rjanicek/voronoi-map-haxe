@@ -48,6 +48,7 @@ class Html {
 	public static inline var S_shapeSeed = "#shapeSeed";
 	public static inline var S_toggle = "#toggle";
 	public static inline var S_view = "#view";
+	public static inline var S_viewBridges = "#viewBridges";
 	public static inline var S_viewRivers = "#viewRivers";
 	public static inline var S_viewRoads = "#viewRoads";
 	public static inline var S_viewWatersheds = "#viewWatersheds";
@@ -226,6 +227,10 @@ class Main {
 		
 		if (new JQuery(Html.S_viewRoads).is(":checked")) {
 			CanvasRender.renderRoads(c, map, roads, Style.displayColors);
+		}
+		
+		if (new JQuery(Html.S_viewBridges).is(":checked")) {
+			CanvasRender.renderBridges(c, map, roads, Style.displayColors);
 		}
 		
 		if (new JQuery(Html.S_viewWatersheds).is(":checked")) {

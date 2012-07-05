@@ -310,6 +310,35 @@ class CanvasRender {
 		}
 	}
 	
+	/**
+	 * Render bridges across every narrow river edge. Bridges are
+	 * straight line segments perpendicular to the edge. Bridges are
+	 * drawn after rivers. TODO: sometimes the bridges aren't long
+	 * enough to cross the entire noisy line river. TODO: bridges
+	 * don't line up with curved road segments when there are
+	 * roads. It might be worth making a shader that draws the bridge
+	 * only when there's water underneath.
+	 */
+    public static function renderBridges( graphics : CanvasRenderingContext2D, map : Map, roads : Roads, colors : DisplayColors) : Void {
+		var edge:Edge;
+
+		for (edge in map.edges) {
+			if (edge.river > 0 && edge.river < 4
+				&& !edge.d0.water && !edge.d1.water
+				&& (edge.d0.elevation > 0.05 || edge.d1.elevation > 0.05)) {
+				var n:Point = { x: -(edge.v1.point.y - edge.v0.point.y), y: edge.v1.point.x - edge.v0.point.x };
+				n.normalize(0.25 + (roads.road[edge.index].isNotNull()? 0.5 : 0) + 0.75 * Math.sqrt(edge.river));
+				graphics.beginPath();
+				graphics.lineWidth = 1.1; 
+				graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.BRIDGE);
+				graphics.lineCap = "square";
+				graphics.moveTo(edge.midpoint.x - n.x, edge.midpoint.y - n.y);
+				graphics.lineTo(edge.midpoint.x + n.x, edge.midpoint.y + n.y);
+				graphics.closePath();
+				graphics.stroke();
+			}
+		}
+	}
 	
     /**
      * Render roads. We draw these before polygon edges, so that rivers overwrite roads.

@@ -17,6 +17,7 @@ import js.Lib;
 import voronoimap.html.CanvasRender;
 import voronoimap.html.Style;
 
+using Lambda;
 using Math;
 using Std;
 using co.janicek.core.html.CanvasCore;
@@ -39,10 +40,12 @@ class Html {
 	public static inline var S_lakeThreshold = "#lakeThreshold";
 	public static inline var S_lloydIterations = "#lloydIterations";
 	public static inline var S_map = "#" + ID_map;
+	public static inline var S_numberOfLands = "#numberOfLands";
 	public static inline var S_numberOfPoints = "#numberOfPoints";
 	public static inline var S_oceanRatio = "#oceanRatio";
 	public static inline var S_random = "#random";
 	public static inline var S_riverChance = "#riverChance";
+	public static inline var S_roadElevationThresholds = "#roadElevationThresholds";
 	public static inline var S_seed = "#seed";
 	public static inline var S_shapeRandom = "#shapeRandom";
 	public static inline var S_shapeSeed = "#shapeSeed";
@@ -81,7 +84,7 @@ class Main {
 		});
 		
 		new JQuery(Html.S_islandShape).change(function(e) {
-			new JQuery([Html.S_islandFactor, Html.S_oceanRatio, Html.S_shapeSeed, Html.S_imageThumb, Html.S_invertImage, Html.S_imageThreshold].toString()).parent().hide();
+			new JQuery([Html.S_islandFactor, Html.S_oceanRatio, Html.S_shapeSeed, Html.S_imageFile, Html.S_imageThumb, Html.S_invertImage, Html.S_imageThreshold].toString()).parent().hide();
 			switch(new JQuery(Html.S_islandShape).val()) {
 				case "bitmap": new JQuery([Html.S_imageFile, Html.S_imageThumb, Html.S_invertImage, Html.S_imageThreshold].toString()).parent().show();
 				case "noise": new JQuery(Html.S_shapeSeed).parent().show();
@@ -112,6 +115,10 @@ class Main {
 				case "debug polygons": new JQuery(Html.S_addNoise).removeAttr("checked");
 				case "smooth": new JQuery(Html.S_addNoise).attr("checked", "true");
 			}
+		});
+		
+		new JQuery(Html.S_viewRoads).change(function(e) {
+			new JQuery(Html.S_roadElevationThresholds).parent().toggle();
 		});
 		
 		new JQuery(Html.S_generate).click(generate);
@@ -159,11 +166,7 @@ class Main {
 		canvas.width = new JQuery(Html.S_width).val().parseInt();
 		canvas.height = new JQuery(Html.S_height).val().parseInt();
 		
-		var map = new Map( { width:canvas.width + 0.0, height:canvas.height + 0.0 },
-			new JQuery(Html.S_numberOfPoints).val().parseInt(),
-			new JQuery(Html.S_lakeThreshold).val().parseFloat(),
-			new JQuery(Html.S_lloydIterations).val().parseInt(), 
-			new JQuery(Html.S_riverChance).val().parseInt());
+		var map = new Map( { width:canvas.width + 0.0, height:canvas.height + 0.0 });
 		
 		var seed = getIntegerOrStringSeed(new JQuery(Html.S_seed).val());
 		var shapeSeed = getIntegerOrStringSeed(new JQuery(Html.S_shapeSeed).val());
@@ -191,14 +194,21 @@ class Main {
 		var lava = new Lava();
 		var roads = new Roads();
 		
-		map.go0PlacePoints();
-		map.go1ImprovePoints();
-		map.go2BuildGraph();
-		map.go3AssignElevations();
-		map.go4AssignMoisture();
+		var numberOfLands = new JQuery(Html.S_numberOfLands).val();
+		if (numberOfLands.isInteger()) {
+			Map.tryMutateMapPointsToGetNumberLands(map, numberOfLands.parseInt(), 30, numberOfLands.parseInt() * 2);
+		}
+		else {
+			map.go0PlacePoints(new JQuery(Html.S_numberOfPoints).val().parseInt());
+			map.go1ImprovePoints(new JQuery(Html.S_lloydIterations).val().parseInt());
+			map.go2BuildGraph();
+			map.go3AssignElevations(new JQuery(Html.S_lakeThreshold).val().parseFloat());
+		}
+		map.go4AssignMoisture(new JQuery(Html.S_riverChance).val().parseInt());
 		map.go5DecorateMap();
 		
-		roads.createRoads(map);
+		var thresholds = new JQuery(Html.S_roadElevationThresholds).val().split(",").map(callback(Std.parseFloat)).array();
+		roads.createRoads(map, thresholds);
 		watersheds.createWatersheds(map);
 		noisyEdges.buildNoisyEdges(map, lava, new PM_PRNG());
 		render(map, noisyEdges, lava, watersheds, roads);

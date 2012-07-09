@@ -19,11 +19,10 @@ using Lambda;
 
 class Map {
 
-    public var NUM_POINTS:Int;
-    public var LAKE_THRESHOLD:Number;
-    public var NUM_LLOYD_ITERATIONS:Int;
-	public var RIVER_CHANCE:Int;
-
+	public static inline var DEFAULT_LAKE_THRESHOLD = 0.3;
+	public static inline var DEFAULT_LLOYD_ITERATIONS = 2;
+	public static inline var DEFAULT_NUMBER_OF_POINTS = 1000;
+	
     // Passed in by the caller:
     public var SIZE:Size;
     
@@ -48,18 +47,11 @@ class Map {
 	/**
 	 * Make a new map.
 	 * @param	size width and height of map
-	 * @param	numPoints default = 1000
-	 * @param	lakeThreshold 0 to 1, fraction of water corners for water polygon, default = 0.3
-	 * @param	numlLloydIterations default = 2
 	 * @param	riverChance 0 = no rivers, > 0 = more rivers, default = map area / 4
 	 */
-	public function new(size:Size, numPoints = 1000, lakeThreshold = 0.3, numlLloydIterations = 2, riverChance:Int = null) {
+	public function new( size : Size) {
 		mapRandom = new PM_PRNG();
 		SIZE = size;
-		NUM_POINTS = numPoints;
-		LAKE_THRESHOLD = lakeThreshold;
-		NUM_LLOYD_ITERATIONS = numlLloydIterations;
-		RIVER_CHANCE = riverChance.isNull() ? Std.int((SIZE.width + SIZE.height) / 4) : riverChance;
 		reset();
 	}
 	
@@ -69,58 +61,16 @@ class Map {
       mapRandom.seed = variant;
     }
     
-    public function reset():Void {
-      var p:Center, q:Corner, edge:Edge;
-
-      // Break cycles so the garbage collector will release data.
-      if (points != null) {
-        points.splice(0, points.length);
-      }
-      if (edges != null) {
-        for (edge in edges) {
-            edge.d0 = edge.d1 = null;
-            edge.v0 = edge.v1 = null;
-          }
-        edges.splice(0, edges.length);
-      }
-      if (centers != null) {
-        for (p in centers) {
-            p.neighbors.splice(0, p.neighbors.length);
-            p.corners.splice(0, p.corners.length);
-            p.borders.splice(0, p.borders.length);
-          }
-        centers.splice(0, centers.length);
-      }
-      if (corners != null) {
-        for (q in corners) {
-            q.adjacent.splice(0, q.adjacent.length);
-            q.touches.splice(0, q.touches.length);
-            q.protrudes.splice(0, q.protrudes.length);
-            q.downslope = null;
-            q.watershed = null;
-          }
-        corners.splice(0, corners.length);
-      }
-	      // Clear the previous graph data.
-      if (points == null) points = new Vector<Point>();
-      if (edges == null) edges = new Vector<Edge>();
-      if (centers == null) centers = new Vector<Center>();
-      if (corners == null) corners = new Vector<Corner>();
-      
-	  // Disabled for Haxe
-      //System.gc();
-    }
-	
 	/**
 	 * Generate the initial random set of points.
 	 */
-	public function go0PlacePoints() : Void {
+	public function go0PlacePoints( numberOfPoints = DEFAULT_NUMBER_OF_POINTS ) : Void {
 		reset();
-		points = generateRandomPoints();
+		points = generateRandomPoints(numberOfPoints);
 	}
 	
-	public function go1ImprovePoints() : Void {
-		improveRandomPoints(points);
+	public function go1ImprovePoints( numLloydIterations = DEFAULT_LLOYD_ITERATIONS ) : Void {
+		improveRandomPoints(points, numLloydIterations);
 	}
 	
 	/**
@@ -140,14 +90,19 @@ class Map {
 	   voronoi = null;
 	   points = null;
 	}
+
 	
-	public function go3AssignElevations() : Void {
+	/**
+	 * 
+	 * @param	lakeThreshold 0 to 1, fraction of water corners for water polygon, default = 0.3
+	 */
+	public function go3AssignElevations( lakeThreshold = DEFAULT_LAKE_THRESHOLD ) : Void {
 		// Determine the elevations and water at Voronoi corners.
 		assignCornerElevations();
 
 		// Determine polygon and corner type: ocean, coast, land.
-		assignOceanCoastAndLand();
-
+		assignOceanCoastAndLand(lakeThreshold);
+		
 		// Rescale elevations so that the highest is 1.0, and they're
 		// distributed well. We want lower elevations to be more common
 		// than higher elevations, in proportions approximately matching
@@ -168,7 +123,7 @@ class Map {
 		assignPolygonElevations();
 	}
 	
-	public function go4AssignMoisture() : Void {
+	public function go4AssignMoisture( riverChance : Null<Int> = null ) : Void {
 		// Determine downslope paths.
 		calculateDownslopes();
 
@@ -177,7 +132,7 @@ class Map {
 		calculateWatersheds();
 
 		// Create rivers.
-		createRivers(RIVER_CHANCE);
+		createRivers(riverChance);
 
 		// Determine moisture at corners, starting at rivers
 		// and lakes, but not oceans. Then redistribute
@@ -192,12 +147,54 @@ class Map {
 	public function go5DecorateMap() : Void {
 		assignBiomes();
 	}
+	
+	public function reset():Void {
+		var p:Center, q:Corner, edge:Edge;
+
+		// Break cycles so the garbage collector will release data.
+		if (points != null) {
+			points.splice(0, points.length);
+		}
+		if (edges != null) {
+			for (edge in edges) {
+				edge.d0 = edge.d1 = null;
+				edge.v0 = edge.v1 = null;
+			}
+			edges.splice(0, edges.length);
+		}
+		if (centers != null) {
+			for (p in centers) {
+				p.neighbors.splice(0, p.neighbors.length);
+				p.corners.splice(0, p.corners.length);
+				p.borders.splice(0, p.borders.length);
+			}
+			centers.splice(0, centers.length);
+		}
+		if (corners != null) {
+			for (q in corners) {
+				q.adjacent.splice(0, q.adjacent.length);
+				q.touches.splice(0, q.touches.length);
+				q.protrudes.splice(0, q.protrudes.length);
+				q.downslope = null;
+				q.watershed = null;
+			}
+			corners.splice(0, corners.length);
+		}
+		// Clear the previous graph data.
+		if (points == null) points = new Vector<Point>();
+		if (edges == null) edges = new Vector<Edge>();
+		if (centers == null) centers = new Vector<Center>();
+		if (corners == null) corners = new Vector<Corner>();
+      
+		// Disabled for Haxe
+		//System.gc();
+	}
 
     // Generate random points and assign them to be on the island or
     // in the water. Some water points are inland lakes; others are
     // ocean. We'll determine ocean later by looking at what's
     // connected to ocean.
-    public function generateRandomPoints():Vector<Point> {
+    public function generateRandomPoints( NUM_POINTS : Int ) : Vector<Point> {
       var p:Point, i:Int, points:Vector<Point> = new Vector<Point>();
       for (i in 0...NUM_POINTS) {
         p = {x:mapRandom.nextDoubleRange(10, SIZE.width-10),
@@ -207,8 +204,10 @@ class Map {
       return points;
     }
 	
+	
+	
     // Improve the random set of points with Lloyd Relaxation.
-    public function improveRandomPoints(points:Vector<Point>):Void {
+    public function improveRandomPoints( points : Vector<Point>, numLloydIterations : Int ) : Void {
       // We'd really like to generate "blue noise". Algorithms:
       // 1. Poisson dart throwing: check each new point against all
       //     existing points, and reject it if it's too close.
@@ -222,7 +221,7 @@ class Map {
       // run it a few times.
 
       var i:Int, p:Point, q:Point, voronoi:Voronoi, region:Vector<Point>;
-      for (i in 0...NUM_LLOYD_ITERATIONS) {
+      for (i in 0...numLloydIterations) {
         voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
         for (p in points) {
             region = voronoi.region(p);
@@ -537,7 +536,7 @@ class Map {
     }
 	
     // Determine polygon and corner types: ocean, coast, land.
-    public function assignOceanCoastAndLand():Void {
+    public function assignOceanCoastAndLand( lakeThreshold : Float ):Void {
       // Compute polygon attributes 'ocean' and 'water' based on the
       // corner attributes. Count the water corners per
       // polygon. Oceans are all polygons connected to the edge of the
@@ -560,7 +559,7 @@ class Map {
                 numWater += 1;
               }
             }
-          p.water = (p.ocean || numWater >= p.corners.length * LAKE_THRESHOLD);
+          p.water = (p.ocean || numWater >= p.corners.length * lakeThreshold);
         }
       while (queue.length > 0) {
         p = queue.shift();
@@ -678,32 +677,35 @@ class Map {
 	 * then move downslope. Mark the edges and corners as rivers.
 	 * @param	riverChance Higher = more rivers.
 	 */
-    public function createRivers(riverChance:Int):Void {
-      var i:Int, q:Corner, edge:Edge;
+    public function createRivers( riverChance : Null<Int> ) : Void {
+		
+		riverChance = riverChance.coalesce(Std.int((SIZE.width + SIZE.height) / 4));
+		
+		var i:Int, q:Corner, edge:Edge;
       
-      for (i in 0...riverChance) {
-        q = corners[mapRandom.nextIntRange(0, corners.length-1)];
-        if (q.ocean || q.elevation < 0.3 || q.elevation > 0.9) continue;
-        // Bias rivers to go west: if (q.downslope.x > q.x) continue;
-        while (!q.coast) {
-          if (q == q.downslope) {
-            break;
-          }
-          edge = lookupEdgeFromCorner(q, q.downslope);
-          edge.river = edge.river + 1;
-		  
-		  //Haxe port
-          //q.river = (q.river || 0) + 1;
-		  q.river = (q.river.isNull() ? 0 : q.river) + 1;
-		  
-		  //Haxe port
-          //q.downslope.river = (q.downslope.river || 0) + 1;  // TODO: fix double count
-		  q.downslope.river = (q.downslope.river.isNull() ? 0 : q.downslope.river) + 1;
-		  
-          q = q.downslope;
-        }
-      }
-    }
+		for (i in 0...riverChance) {
+			q = corners[mapRandom.nextIntRange(0, corners.length-1)];
+			if (q.ocean || q.elevation < 0.3 || q.elevation > 0.9) continue;
+			// Bias rivers to go west: if (q.downslope.x > q.x) continue;
+			while (!q.coast) {
+				if (q == q.downslope) {
+					break;
+				}
+				edge = lookupEdgeFromCorner(q, q.downslope);
+				edge.river = edge.river + 1;
+	  
+				//Haxe port
+				//q.river = (q.river || 0) + 1;
+				q.river = (q.river.isNull() ? 0 : q.river) + 1;
+	  
+				//Haxe port
+				//q.downslope.river = (q.downslope.river || 0) + 1;  // TODO: fix double count
+				q.downslope.river = (q.downslope.river.isNull() ? 0 : q.downslope.river) + 1;
+	  
+				q = q.downslope;
+			}
+		}
+	}
 
     // Calculate moisture. Freshwater sources spread moisture: rivers
     // and lakes (not oceans). Saltwater sources have moisture but do
@@ -815,4 +817,32 @@ class Map {
     public function inside(p:Point):Boolean {
       return islandShape({x:2*(p.x/SIZE.width - 0.5), y : 2*(p.y/SIZE.height - 0.5)});
     }
+	
+	// ------------------------------------------------------------------------
+	// Extensions
+	
+	public static function countLands( centers : Array<Center> ) : Int {
+		return centers.count(function(c) { return !c.water; } );
+	}
+	
+	public static function tryMutateMapPointsToGetNumberLands( map : Map, numberOfLands : Int, timeoutSeconds = 2, initialNumberOfPoints = DEFAULT_NUMBER_OF_POINTS, numLloydIterations = DEFAULT_LLOYD_ITERATIONS, lakeThreshold = DEFAULT_LAKE_THRESHOLD ) : Map {
+		var pointCount = initialNumberOfPoints;
+		var startTime = Timer.stamp();
+		var targetLandCountFound = false;
+		do {
+			map.go0PlacePoints(pointCount);
+			map.go1ImprovePoints(numLloydIterations);
+			map.go2BuildGraph();
+			map.go3AssignElevations(lakeThreshold);
+			var lands = countLands(map.centers);
+			if (lands == numberOfLands)
+				targetLandCountFound = true;
+			else
+				pointCount += (lands < numberOfLands ? 1 : -1);
+			trace([pointCount, lands]);	
+		} while (!targetLandCountFound && Timer.stamp() - startTime < timeoutSeconds);
+		
+		return map;
+	}
+	
 }

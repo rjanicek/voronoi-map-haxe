@@ -20,7 +20,7 @@ class Roads {
 	
     // We want to mark different elevation zones so that we can draw
     // island-circling roads that divide the areas.
-    public function createRoads(map:Map):Void {
+    public function createRoads(map:Map, elevationThresholds : Array<Float>):Void {
       // Oceans and coastal polygons are the lowest contour zone
       // (1). Anything connected to contour level K, if it's below
       // elevation threshold K, or if it's water, gets contour level
@@ -28,7 +28,7 @@ class Roads {
       // to contour level K, gets contour level K+1.
       var queue:Array<Center> = [];
       var p:Center, q:Corner, r:Center, edge:Edge, newLevel:Int;
-      var elevationThresholds = [0, 0.05, 0.37, 0.64];
+      //var elevationThresholds = [0, 0.05, 0.37, 0.64];
       var cornerContour:Array<Int> = [];  // corner index -> int contour level
       var centerContour:Array<Int> = [];  // center index -> int contour level
     

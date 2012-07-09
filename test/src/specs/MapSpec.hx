@@ -22,15 +22,15 @@ class MapSpec {
 
 			var map = new Map({width:100.0, height:100.0});
 			map.newIsland(IslandShape.makeRadial(1), 1);
-
+			var numPoints = 1000;
 			J.it("should place points", function() {
-				map.go0PlacePoints();
-				J.expect(map.points.length).toBe(map.NUM_POINTS);
+				map.go0PlacePoints(numPoints);
+				J.expect(map.points.length).toBe(numPoints);
 			});
 			
 			J.it("should improve points", function() {
 				map.go1ImprovePoints();
-				J.expect(map.points.length).toBe(map.NUM_POINTS);
+				J.expect(map.points.length).toBe(numPoints);
 			});
 
 			J.it("should build a graph", function() {
@@ -49,7 +49,7 @@ class MapSpec {
 			J.it("should add edges", function() {
 				var lava = new Lava();
 			    var roads = new Roads();
-				roads.createRoads(map);
+				roads.createRoads(map, [0, 0.05, 0.37, 0.64]);
 			    //lava.createLava(map, map.mapRandom.nextDouble);
 			   var watersheds = new Watersheds();
 			   watersheds.createWatersheds(map);

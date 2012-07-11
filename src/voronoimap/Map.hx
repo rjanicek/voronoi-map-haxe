@@ -23,23 +23,33 @@ class Map {
 	public static inline var DEFAULT_LLOYD_ITERATIONS = 2;
 	public static inline var DEFAULT_NUMBER_OF_POINTS = 1000;
 	
-    // Passed in by the caller:
+    /**
+     * Passed in by the caller:
+     */
     public var SIZE:Size;
     
-    // Island shape is controlled by the islandRandom seed and the
-    // type of island, passed in when we set the island shape. The
-    // islandShape function uses both of them to determine whether any
-    // point should be water or land.
+	/**
+	 * Island shape is controlled by the islandRandom seed and the
+	 * type of island, passed in when we set the island shape. The
+	 * islandShape function uses both of them to determine whether any
+	 * point should be water or land.
+	 */
     public var islandShape:Point->Boolean;
 
-    // Island details are controlled by this random generator. The
-    // initial map upon loading is always deterministic, but
-    // subsequent maps reset this random number generator with a
-    // random seed.
+	/**
+	 * Island details are controlled by this random generator. The
+	 * initial map upon loading is always deterministic, but
+	 * subsequent maps reset this random number generator with a
+	 * random seed.
+	 */
     public var mapRandom:PM_PRNG;
 	
     // These store the graph data
-    public var points:Vector<Point>;  // Only useful during map construction
+	
+	/**
+	 * Only useful during map construction
+	 */
+    public var points:Vector<Point>;
     public var centers:Vector<Center>;
     public var corners:Vector<Corner>;
     public var edges:Vector<Edge>;
@@ -55,10 +65,12 @@ class Map {
 		reset();
 	}
 	
-    // Random parameters governing the overall shape of the island
+    /**
+     * Random parameters governing the overall shape of the island
+     */
     public function newIsland(islandShape:Point->Boolean, variant:Int):Void {
-      this.islandShape = islandShape;
-      mapRandom.seed = variant;
+		this.islandShape = islandShape;
+		mapRandom.seed = variant;
     }
     
 	/**
@@ -190,23 +202,25 @@ class Map {
 		//System.gc();
 	}
 
-    // Generate random points and assign them to be on the island or
-    // in the water. Some water points are inland lakes; others are
-    // ocean. We'll determine ocean later by looking at what's
-    // connected to ocean.
+	/**
+	 * Generate random points and assign them to be on the island or
+	 * in the water. Some water points are inland lakes; others are
+	 * ocean. We'll determine ocean later by looking at what's
+	 * connected to ocean.
+	 */
     public function generateRandomPoints( NUM_POINTS : Int ) : Vector<Point> {
-      var p:Point, i:Int, points:Vector<Point> = new Vector<Point>();
-      for (i in 0...NUM_POINTS) {
-        p = {x:mapRandom.nextDoubleRange(10, SIZE.width-10),
-		y:mapRandom.nextDoubleRange(10, SIZE.height-10) };
-        points.push(p);
-      }
-      return points;
-    }
+		var p:Point, i:Int, points:Vector<Point> = new Vector<Point>();
+		for (i in 0...NUM_POINTS) {
+			p = {x:mapRandom.nextDoubleRange(10, SIZE.width-10),
+			y:mapRandom.nextDoubleRange(10, SIZE.height-10) };
+			points.push(p);
+		}
+		return points;
+	}
 	
-	
-	
-    // Improve the random set of points with Lloyd Relaxation.
+    /**
+     * Improve the random set of points with Lloyd Relaxation.
+     */
     public function improveRandomPoints( points : Vector<Point>, numLloydIterations : Int ) : Void {
       // We'd really like to generate "blue noise". Algorithms:
       // 1. Poisson dart throwing: check each new point against all
@@ -220,89 +234,95 @@ class Map {
       // it will turn into a grid, but convergence is very slow, and we only
       // run it a few times.
 
-      var i:Int, p:Point, q:Point, voronoi:Voronoi, region:Vector<Point>;
-      for (i in 0...numLloydIterations) {
-        voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
-        for (p in points) {
-            region = voronoi.region(p);
-            p.x = 0.0;
-            p.y = 0.0;
-            for (q in region) {
-                p.x += q.x;
-                p.y += q.y;
-              }
-            p.x /= region.length;
-            p.y /= region.length;
-            region.splice(0, region.length);
-          }
-        voronoi.dispose();
-      }
-    }
-	
-    // Although Lloyd relaxation improves the uniformity of polygon
-    // sizes, it doesn't help with the edge lengths. Short edges can
-    // be bad for some games, and lead to weird artifacts on
-    // rivers. We can easily lengthen short edges by moving the
-    // corners, but **we lose the Voronoi property**.  The corners are
-    // moved to the average of the polygon centers around them. Short
-    // edges become longer. Long edges tend to become shorter. The
-    // polygons tend to be more uniform after this step.
+		var i:Int, p:Point, q:Point, voronoi:Voronoi, region:Vector<Point>;
+		for (i in 0...numLloydIterations) {
+			voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
+			for (p in points) {
+				region = voronoi.region(p);
+				p.x = 0.0;
+				p.y = 0.0;
+				for (q in region) {
+					p.x += q.x;
+					p.y += q.y;
+				}
+				p.x /= region.length;
+				p.y /= region.length;
+				region.splice(0, region.length);
+			}
+			voronoi.dispose();
+		}
+	}
+
+	/**
+	 * Although Lloyd relaxation improves the uniformity of polygon
+	 * sizes, it doesn't help with the edge lengths. Short edges can
+	 * be bad for some games, and lead to weird artifacts on
+	 * rivers. We can easily lengthen short edges by moving the
+	 * corners, but **we lose the Voronoi property**.  The corners are
+	 * moved to the average of the polygon centers around them. Short
+	 * edges become longer. Long edges tend to become shorter. The
+	 * polygons tend to be more uniform after this step.
+	 */
     public function improveCorners():Void {
-      var newCorners:Vector<Point> = new Vector<Point>();
-      var q:Corner, r:Center, point:Point, i:Int, edge:Edge;
+		var newCorners:Vector<Point> = new Vector<Point>();
+		var q:Corner, r:Center, point:Point, i:Int, edge:Edge;
 
-      // First we compute the average of the centers next to each corner.
-      for (q in corners) {
-          if (q.border) {
-            newCorners[q.index] = q.point;
-          } else {
-            point = {x:0.0, y:0.0};
-            for (r in q.touches) {
-                point.x += r.point.x;
-                point.y += r.point.y;
-              }
-            point.x /= q.touches.length;
-            point.y /= q.touches.length;
-            newCorners[q.index] = point;
-          }
-        }
+		// First we compute the average of the centers next to each corner.
+		for (q in corners) {
+			if (q.border) {
+				newCorners[q.index] = q.point;
+			} else {
+				point = {x:0.0, y:0.0};
+				for (r in q.touches) {
+					point.x += r.point.x;
+					point.y += r.point.y;
+				}
+				point.x /= q.touches.length;
+				point.y /= q.touches.length;
+				newCorners[q.index] = point;
+			}
+		}
 
-      // Move the corners to the new locations.
-      for (i in 0...corners.length) {
-        corners[i].point = newCorners[i];
-      }
+		// Move the corners to the new locations.
+		for (i in 0...corners.length) {
+			corners[i].point = newCorners[i];
+		}
 
-      // The edge midpoints were computed for the old corners and need
-      // to be recomputed.
-      for (edge in edges) {
-          if (edge.v0 != null && edge.v1 != null) {
-            edge.midpoint = PointCore.interpolate(edge.v0.point, edge.v1.point, 0.5);
-          }
-        }
-    }
-	
-    // Create an array of corners that are on land only, for use by
-    // algorithms that work only on land.  We return an array instead
-    // of a vector because the redistribution algorithms want to sort
-    // this array using Array.sortOn.
+		// The edge midpoints were computed for the old corners and need
+		// to be recomputed.
+		for (edge in edges) {
+			if (edge.v0 != null && edge.v1 != null) {
+				edge.midpoint = PointCore.interpolate(edge.v0.point, edge.v1.point, 0.5);
+			}
+		}
+	}
+
+	/**
+	 * Create an array of corners that are on land only, for use by
+	 * algorithms that work only on land.  We return an array instead
+	 * of a vector because the redistribution algorithms want to sort
+	 * this array using Array.sortOn.
+	 */
     public function landCorners(corners:Vector<Corner>):Array<Corner> {
-      var q:Corner, locations:Array<Corner> = [];
-      for (q in corners) {
-          if (!q.ocean && !q.coast) {
-            locations.push(q);
-          }
-        }
-      return locations;
-    }
-	
-    // Build graph data structure in 'edges', 'centers', 'corners',
-    // based on information in the Voronoi results: point.neighbors
-    // will be a list of neighboring points of the same type (corner
-    // or center); point.edges will be a list of edges that include
-    // that point. Each edge connects to four points: the Voronoi edge
-    // edge.{v0,v1} and its dual Delaunay triangle edge edge.{d0,d1}.
-    // For boundary polygons, the Delaunay edge will have one null
-    // point, and the Voronoi edge may be null.
+		var q:Corner, locations:Array<Corner> = [];
+		for (q in corners) {
+			if (!q.ocean && !q.coast) {
+				locations.push(q);
+			}
+		}
+		return locations;
+	}
+
+	/**
+	 * Build graph data structure in 'edges', 'centers', 'corners',
+	 * based on information in the Voronoi results: point.neighbors
+	 * will be a list of neighboring points of the same type (corner
+	 * or center); point.edges will be a list of edges that include
+	 * that point. Each edge connects to four points: the Voronoi edge
+	 * edge.{v0,v1} and its dual Delaunay triangle edge edge.{d0,d1}.
+	 * For boundary polygons, the Delaunay edge will have one null
+	 * point, and the Voronoi edge may be null.
+	 */
     public function buildGraph(points:Vector<Point>, voronoi:Voronoi):Void {
       var p:Center, q:Corner, point:Point, other:Point;
       var libedges:Vector<com.nodename.delaunay.Edge> = voronoi.edges();
@@ -430,14 +450,16 @@ class Map {
         }
     }
 
-    // Determine elevations and water at Voronoi corners. By
-    // construction, we have no local minima. This is important for
-    // the downslope vectors later, which are used in the river
-    // construction algorithm. Also by construction, inlets/bays
-    // push low elevation areas inland, which means many rivers end
-    // up flowing out through them. Also by construction, lakes
-    // often end up on river paths because they don't raise the
-    // elevation as much as other terrain does.
+	/**
+	 * Determine elevations and water at Voronoi corners. By
+	 * construction, we have no local minima. This is important for
+	 * the downslope vectors later, which are used in the river
+	 * construction algorithm. Also by construction, inlets/bays
+	 * push low elevation areas inland, which means many rivers end
+	 * up flowing out through them. Also by construction, lakes
+	 * often end up on river paths because they don't raise the
+	 * elevation as much as other terrain does.
+	 */
     public function assignCornerElevations():Void {
       var q:Corner, s:Corner;
       var queue:Array<Corner> = [];
@@ -480,11 +502,13 @@ class Map {
       }
     }
 	
-    // Change the overall distribution of elevations so that lower
-    // elevations are more common than higher
-    // elevations. Specifically, we want elevation X to have frequency
-    // (1-X).  To do this we will sort the corners, then set each
-    // corner to its desired elevation.
+	/**
+	 * Change the overall distribution of elevations so that lower
+	 * elevations are more common than higher
+	 * elevations. Specifically, we want elevation X to have frequency
+	 * (1-X).  To do this we will sort the corners, then set each
+	 * corner to its desired elevation.
+	 */
     public function redistributeElevations(locations:Array<Corner>):Void {
       // SCALE_FACTOR increases the mountain area. At 1.0 the maximum
       // elevation barely shows up on the map, so we set it to 1.1.
@@ -518,24 +542,28 @@ class Map {
       }
     }	
 	
-    // Change the overall distribution of moisture to be evenly distributed.
+    /**
+     * Change the overall distribution of moisture to be evenly distributed.
+     */
     public function redistributeMoisture(locations:Array<Corner>):Void {
-      var i:Int;
+		var i:Int;
       
-	  locations.sort(function(c1, c2) {
-		  if (c1.moisture > c2.moisture) return 1;
-		  if (c1.moisture < c2.moisture) return -1;
- 		  if (c1.index > c2.index) return 1;
-		  if (c1.index < c2.index) return -1;
-		  return 0;
-	  } );
+		locations.sort(function(c1, c2) {
+			if (c1.moisture > c2.moisture) return 1;
+			if (c1.moisture < c2.moisture) return -1;
+			if (c1.index > c2.index) return 1;
+			if (c1.index < c2.index) return -1;
+			return 0;
+		} );
 	  
-      for (i in 0...locations.length) {
-        locations[i].moisture = i / (locations.length - 1);
-      }
-    }
+		for (i in 0...locations.length) {
+			locations[i].moisture = i / (locations.length - 1);
+		}
+	}
 	
-    // Determine polygon and corner types: ocean, coast, land.
+    /**
+     * Determine polygon and corner types: ocean, coast, land.
+     */
     public function assignOceanCoastAndLand( lakeThreshold : Float ):Void {
       // Compute polygon attributes 'ocean' and 'water' based on the
       // corner attributes. Count the water corners per
@@ -602,21 +630,25 @@ class Map {
         }
     }
 	
-    // Polygon elevations are the average of the elevations of their corners.
+    /**
+     * Polygon elevations are the average of the elevations of their corners.
+     */
     public function assignPolygonElevations():Void {
-      var p:Center, q:Corner, sumElevation:Number;
-      for (p in centers) {
-          sumElevation = 0.0;
-          for (q in p.corners) {
-              sumElevation += q.elevation;
-            }
-          p.elevation = sumElevation / p.corners.length;
-        }
-    }
+		var p:Center, q:Corner, sumElevation:Number;
+		for (p in centers) {
+			sumElevation = 0.0;
+			for (q in p.corners) {
+				sumElevation += q.elevation;
+			}
+			p.elevation = sumElevation / p.corners.length;
+		}
+	}
 
-    // Calculate downslope pointers.  At every point, we point to the
-    // point downstream from it, or to itself.  This is used for
-    // generating rivers and watersheds.
+	/**
+	 * Calculate downslope pointers.  At every point, we point to the
+	 * point downstream from it, or to itself.  This is used for
+	 * generating rivers and watersheds.
+	 */
     public function calculateDownslopes():Void {
       var q:Corner, s:Corner, r:Corner;
       
@@ -630,12 +662,14 @@ class Map {
           q.downslope = r;
         }
     }
-	
-    // Calculate the watershed of every land point. The watershed is
-    // the last downstream land point in the downslope graph. TODO:
-    // watersheds are currently calculated on corners, but it'd be
-    // more useful to compute them on polygon centers so that every
-    // polygon can be marked as being in one watershed.
+
+	/**
+	 * Calculate the watershed of every land point. The watershed is
+	 * the last downstream land point in the downslope graph. TODO:
+	 * watersheds are currently calculated on corners, but it'd be
+	 * more useful to compute them on polygon centers so that every
+	 * polygon can be marked as being in one watershed.
+	 */
     public function calculateWatersheds():Void {
       var q:Corner, r:Corner, i:Int, changed:Boolean;
       
@@ -707,9 +741,11 @@ class Map {
 		}
 	}
 
-    // Calculate moisture. Freshwater sources spread moisture: rivers
-    // and lakes (not oceans). Saltwater sources have moisture but do
-    // not spread it (we set it at the end, after propagation).
+	/**
+	 * Calculate moisture. Freshwater sources spread moisture: rivers
+	 * and lakes (not oceans). Saltwater sources have moisture but do
+	 * not spread it (we set it at the end, after propagation).
+	 */
     public function assignCornerMoisture():Void {
       var q:Corner, r:Corner, newMoisture:Number;
       var queue:Array<Corner> = [];
@@ -741,7 +777,9 @@ class Map {
         }
     }
 	
-    // Polygon moisture is the average of the moisture at corners
+    /**
+     * Polygon moisture is the average of the moisture at corners
+     */
     public function assignPolygonMoisture():Void {
       var p:Center, q:Corner, sumMoisture:Number;
       for (p in centers) {
@@ -754,11 +792,13 @@ class Map {
         }
     }
 
-    // Assign a biome type to each polygon. If it has
-    // ocean/coast/water, then that's the biome; otherwise it depends
-    // on low/high elevation and low/medium/high moisture. This is
-    // roughly based on the Whittaker diagram but adapted to fit the
-    // needs of the island map generator.
+	/**
+	 * Assign a biome type to each polygon. If it has
+	 * ocean/coast/water, then that's the biome; otherwise it depends
+	 * on low/high elevation and low/medium/high moisture. This is
+	 * roughly based on the Whittaker diagram but adapted to fit the
+	 * needs of the island map generator.
+	 */
     static public function getBiome(p:Center):String {
       if (p.ocean) {
         return 'OCEAN';
@@ -796,9 +836,11 @@ class Map {
           p.biome = getBiome(p);
         }
     }
-
-    // Look up a Voronoi Edge object given two adjacent Voronoi
-    // polygons, or two adjacent Voronoi corners
+	
+	/**
+	 * Look up a Voronoi Edge object given two adjacent Voronoi
+	 * polygons, or two adjacent Voronoi corners
+	 */
     public function lookupEdgeFromCenter(p:Center, r:Center):Edge {
       for (edge in p.borders) {
           if (edge.d0 == r || edge.d1 == r) return edge;
@@ -813,7 +855,9 @@ class Map {
       return null;
     }
 	
-    // Determine whether a given point should be on the island or in the water.
+    /**
+     * Determine whether a given point should be on the island or in the water.
+     */
     public function inside(p:Point):Boolean {
       return islandShape({x:2*(p.x/SIZE.width - 0.5), y : 2*(p.y/SIZE.height - 0.5)});
     }
@@ -825,6 +869,10 @@ class Map {
 		return centers.count(function(c) { return !c.water; } );
 	}
 	
+	/**
+	 * Rebuilds the map varying the number of points until desired number of land centers are generated or timeout is reached.
+	 * Not an efficient algorithim, but gets the job done.
+	 */
 	public static function tryMutateMapPointsToGetNumberLands( map : Map, numberOfLands : Int, timeoutSeconds = 2, initialNumberOfPoints = DEFAULT_NUMBER_OF_POINTS, numLloydIterations = DEFAULT_LLOYD_ITERATIONS, lakeThreshold = DEFAULT_LAKE_THRESHOLD ) : Map {
 		var pointCount = initialNumberOfPoints;
 		var startTime = Timer.stamp();

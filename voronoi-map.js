@@ -23,6 +23,15 @@ Hash.prototype = {
 }
 var Lambda = $hxClasses["Lambda"] = function() { }
 Lambda.__name__ = ["Lambda"];
+Lambda.array = function(it) {
+	var a = new Array();
+	var $it0 = it.iterator();
+	while( $it0.hasNext() ) {
+		var i = $it0.next();
+		a.push(i);
+	}
+	return a;
+}
 Lambda.map = function(it,f) {
 	var l = new List();
 	var $it0 = it.iterator();
@@ -50,6 +59,23 @@ Lambda.fold = function(it,f,first) {
 	}
 	return first;
 }
+Lambda.count = function(it,pred) {
+	var n = 0;
+	if(pred == null) {
+		var $it0 = it.iterator();
+		while( $it0.hasNext() ) {
+			var _ = $it0.next();
+			n++;
+		}
+	} else {
+		var $it1 = it.iterator();
+		while( $it1.hasNext() ) {
+			var x = $it1.next();
+			if(pred(x)) n++;
+		}
+	}
+	return n;
+}
 Lambda.indexOf = function(it,v) {
 	var i = 0;
 	var $it0 = it.iterator();
@@ -76,6 +102,16 @@ List.prototype = {
 		if(this.h == null) this.h = x; else this.q[1] = x;
 		this.q = x;
 		this.length++;
+	}
+	,iterator: function() {
+		return { h : this.h, hasNext : function() {
+			return this.h != null;
+		}, next : function() {
+			if(this.h == null) return null;
+			var x = this.h[0];
+			this.h = this.h[1];
+			return x;
+		}};
 	}
 	,__class__: List
 }
@@ -448,12 +484,12 @@ co.janicek.core.html.CanvasCore.addNoise = function(pixelData,randomSeed,noiseLe
 	noiseLevel = co.janicek.core.math.MathCore.clampInt(noiseLevel,1,255);
 	var delta;
 	co.janicek.core.html.CanvasCore.renderCanvasPixelArray(pixelData,function(index,red,green,blue,alpha) {
-		delta = co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0,-noiseLevel,noiseLevel);
+		delta = co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0 | 0,-noiseLevel,noiseLevel);
 		var newColors = { red : null, green : null, blue : null, alpha : null};
 		if(changeRed) newColors.red = red + delta;
-		if(changeGreen) newColors.green = green + (grayScale?delta:co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0,-noiseLevel,noiseLevel));
-		if(changeBlue) newColors.blue = blue + (grayScale?delta:co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0,-noiseLevel,noiseLevel));
-		if(changeAlpha) newColors.alpha = alpha + co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0,-noiseLevel,noiseLevel);
+		if(changeGreen) newColors.green = green + (grayScale?delta:co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0 | 0,-noiseLevel,noiseLevel));
+		if(changeBlue) newColors.blue = blue + (grayScale?delta:co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0 | 0,-noiseLevel,noiseLevel));
+		if(changeAlpha) newColors.alpha = alpha + co.janicek.core.math.RandomCore.toIntRange(randomSeed = randomSeed * 16807.0 % 2147483647.0 | 0,-noiseLevel,noiseLevel);
 		return newColors;
 	});
 	return pixelData;
@@ -690,7 +726,7 @@ co.janicek.core.math.RandomCore.makeRandomSeed = function() {
 	return Math.floor(Math.random() * 2147483647.0);
 }
 co.janicek.core.math.RandomCore.nextParkMiller = function(seed) {
-	return seed * 16807.0 % 2147483647.0;
+	return seed * 16807.0 % 2147483647.0 | 0;
 }
 co.janicek.core.math.RandomCore.toFloat = function(seed) {
 	return seed / 2147483647.0;
@@ -1915,6 +1951,14 @@ haxe.Log.trace = function(v,infos) {
 haxe.Log.prototype = {
 	__class__: haxe.Log
 }
+haxe.Timer = $hxClasses["haxe.Timer"] = function() { }
+haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.stamp = function() {
+	return Date.now().getTime() / 1000;
+}
+haxe.Timer.prototype = {
+	__class__: haxe.Timer
+}
 var js = js || {}
 js.Boot = $hxClasses["js.Boot"] = function() { }
 js.Boot.__name__ = ["js","Boot"];
@@ -2159,7 +2203,7 @@ voronoimap.IslandShape.makeBitmap = function(bitmap) {
 }
 voronoimap.IslandShape.makeNoise = function(seed) {
 	return function(q) {
-		return (seed = seed * 16807.0 % 2147483647.0) / 2147483647.0 > 0.5;
+		return (seed = seed * 16807.0 % 2147483647.0 | 0) / 2147483647.0 > 0.5;
 	};
 }
 voronoimap.IslandShape.prototype = {
@@ -2200,7 +2244,7 @@ voronoimap.Main.initializeUi = function() {
 		new js.JQuery("#shapeSeed").val(Std.string(co.janicek.core.math.RandomCore.makeRandomSeed()));
 	});
 	new js.JQuery("#islandShape").change(function(e) {
-		new js.JQuery(["#islandFactor","#oceanRatio","#shapeSeed","#imageThumb","#invertImage","#imageThreshold"].toString()).parent().hide();
+		new js.JQuery(["#islandFactor","#oceanRatio","#shapeSeed","#imageFile","#imageThumb","#invertImage","#imageThreshold"].toString()).parent().hide();
 		switch(new js.JQuery("#islandShape").val()) {
 		case "bitmap":
 			new js.JQuery(["#imageFile","#imageThumb","#invertImage","#imageThreshold"].toString()).parent().show();
@@ -2217,7 +2261,7 @@ voronoimap.Main.initializeUi = function() {
 		}
 	});
 	new js.JQuery("#imageFile").change(function(e) {
-		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 94, className : "voronoimap.Main", methodName : "initializeUi"});
+		haxe.Log.trace("file changed",{ fileName : "Main.hx", lineNumber : 97, className : "voronoimap.Main", methodName : "initializeUi"});
 		var fileUpload = new js.JQuery("#imageFile").get()[0];
 		var files = fileUpload.files;
 		if(files.length == 1) {
@@ -2239,6 +2283,9 @@ voronoimap.Main.initializeUi = function() {
 			new js.JQuery("#addNoise").attr("checked","true");
 			break;
 		}
+	});
+	new js.JQuery("#viewRoads").change(function(e) {
+		new js.JQuery("#roadElevationThresholds").parent().toggle();
 	});
 	new js.JQuery("#generate").click(voronoimap.Main.generate);
 	new js.JQuery("#toggle").click(function() {
@@ -2278,14 +2325,14 @@ voronoimap.Main.generate = function() {
 	var canvas = voronoimap.Main.findOrCreateCanvas();
 	canvas.width = Std.parseInt(new js.JQuery("#width").val());
 	canvas.height = Std.parseInt(new js.JQuery("#height").val());
-	var map = new voronoimap.Map({ width : canvas.width + 0.0, height : canvas.height + 0.0},Std.parseInt(new js.JQuery("#numberOfPoints").val()),Std.parseFloat(new js.JQuery("#lakeThreshold").val()),Std.parseInt(new js.JQuery("#lloydIterations").val()),Std.parseInt(new js.JQuery("#riverChance").val()));
+	var map = new voronoimap.Map({ width : canvas.width + 0.0, height : canvas.height + 0.0});
 	var seed = voronoimap.Main.getIntegerOrStringSeed(new js.JQuery("#seed").val());
 	var shapeSeed = voronoimap.Main.getIntegerOrStringSeed(new js.JQuery("#shapeSeed").val());
 	var islandShape = new js.JQuery("#islandShape").val();
 	switch(islandShape) {
 	case "bitmap":
 		var imageData = co.janicek.core.html.CanvasCore.getImageData(voronoimap.Main.image);
-		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 176, className : "voronoimap.Main", methodName : "generate"});
+		haxe.Log.trace(Std.parseInt(new js.JQuery("#imageThreshold").val()),{ fileName : "Main.hx", lineNumber : 179, className : "voronoimap.Main", methodName : "generate"});
 		var bitmap = co.janicek.core.html.CanvasCore.makeAverageThresholdBitmap(imageData,Std.parseInt(new js.JQuery("#imageThreshold").val()));
 		if(new js.JQuery("#invertImage")["is"](":checked")) bitmap = co.janicek.core.html.CanvasCore.invertBitmap(bitmap);
 		map.newIsland(voronoimap.IslandShape.makeBitmap(bitmap),seed);
@@ -2310,13 +2357,21 @@ voronoimap.Main.generate = function() {
 	var noisyEdges = new voronoimap.NoisyEdges();
 	var lava = new voronoimap.Lava();
 	var roads = new voronoimap.Roads();
-	map.go0PlacePoints();
-	map.go1ImprovePoints();
-	map.go2BuildGraph();
-	map.go3AssignElevations();
-	map.go4AssignMoisture();
+	var numberOfLands = new js.JQuery("#numberOfLands").val();
+	if(co.janicek.core.StringCore.isInteger(numberOfLands)) voronoimap.Map.tryMutateMapPointsToGetNumberLands(map,Std.parseInt(numberOfLands),30,Std.parseInt(numberOfLands) * 2); else {
+		map.go0PlacePoints(Std.parseInt(new js.JQuery("#numberOfPoints").val()));
+		map.go1ImprovePoints(Std.parseInt(new js.JQuery("#lloydIterations").val()));
+		map.go2BuildGraph();
+		map.go3AssignElevations(Std.parseFloat(new js.JQuery("#lakeThreshold").val()));
+	}
+	map.go4AssignMoisture(Std.parseInt(new js.JQuery("#riverChance").val()));
 	map.go5DecorateMap();
-	roads.createRoads(map);
+	var thresholds = Lambda.array(Lambda.map(new js.JQuery("#roadElevationThresholds").val().split(","),(function(f) {
+		return function(a1) {
+			return f(a1);
+		};
+	})(Std.parseFloat)));
+	roads.createRoads(map,thresholds);
 	watersheds.createWatersheds(map);
 	noisyEdges.buildNoisyEdges(map,lava,new de.polygonal.math.PM_PRNG());
 	voronoimap.Main.render(map,noisyEdges,lava,watersheds,roads);
@@ -2345,16 +2400,9 @@ voronoimap.Main.render = function(map,noisyEdges,lava,watersheds,roads) {
 voronoimap.Main.prototype = {
 	__class__: voronoimap.Main
 }
-voronoimap.Map = $hxClasses["voronoimap.Map"] = function(size,numPoints,lakeThreshold,numlLloydIterations,riverChance) {
-	if(numlLloydIterations == null) numlLloydIterations = 2;
-	if(lakeThreshold == null) lakeThreshold = 0.3;
-	if(numPoints == null) numPoints = 1000;
+voronoimap.Map = $hxClasses["voronoimap.Map"] = function(size) {
 	this.mapRandom = new de.polygonal.math.PM_PRNG();
 	this.SIZE = size;
-	this.NUM_POINTS = numPoints;
-	this.LAKE_THRESHOLD = lakeThreshold;
-	this.NUM_LLOYD_ITERATIONS = numlLloydIterations;
-	this.RIVER_CHANCE = riverChance == null?(this.SIZE.width + this.SIZE.height) / 4 | 0:riverChance;
 	this.reset();
 };
 voronoimap.Map.__name__ = ["voronoimap","Map"];
@@ -2371,12 +2419,32 @@ voronoimap.Map.getBiome = function(p) {
 		if(p.moisture > 0.83) return "TEMPERATE_RAIN_FOREST"; else if(p.moisture > 0.50) return "TEMPERATE_DECIDUOUS_FOREST"; else if(p.moisture > 0.16) return "GRASSLAND"; else return "TEMPERATE_DESERT";
 	} else if(p.moisture > 0.66) return "TROPICAL_RAIN_FOREST"; else if(p.moisture > 0.33) return "TROPICAL_SEASONAL_FOREST"; else if(p.moisture > 0.16) return "GRASSLAND"; else return "SUBTROPICAL_DESERT";
 }
+voronoimap.Map.countLands = function(centers) {
+	return Lambda.count(centers,function(c) {
+		return !c.water;
+	});
+}
+voronoimap.Map.tryMutateMapPointsToGetNumberLands = function(map,numberOfLands,timeoutSeconds,initialNumberOfPoints,numLloydIterations,lakeThreshold) {
+	if(lakeThreshold == null) lakeThreshold = 0.3;
+	if(numLloydIterations == null) numLloydIterations = 2;
+	if(initialNumberOfPoints == null) initialNumberOfPoints = 1000;
+	if(timeoutSeconds == null) timeoutSeconds = 2;
+	var pointCount = initialNumberOfPoints;
+	var startTime = haxe.Timer.stamp();
+	var targetLandCountFound = false;
+	do {
+		map.go0PlacePoints(pointCount);
+		map.go1ImprovePoints(numLloydIterations);
+		map.go2BuildGraph();
+		map.go3AssignElevations(lakeThreshold);
+		var lands = voronoimap.Map.countLands(map.centers);
+		if(lands == numberOfLands) targetLandCountFound = true; else pointCount += lands < numberOfLands?1:-1;
+		haxe.Log.trace([pointCount,lands],{ fileName : "Map.hx", lineNumber : 842, className : "voronoimap.Map", methodName : "tryMutateMapPointsToGetNumberLands"});
+	} while(!targetLandCountFound && haxe.Timer.stamp() - startTime < timeoutSeconds);
+	return map;
+}
 voronoimap.Map.prototype = {
-	NUM_POINTS: null
-	,LAKE_THRESHOLD: null
-	,NUM_LLOYD_ITERATIONS: null
-	,RIVER_CHANCE: null
-	,SIZE: null
+	SIZE: null
 	,islandShape: null
 	,mapRandom: null
 	,points: null
@@ -2386,6 +2454,47 @@ voronoimap.Map.prototype = {
 	,newIsland: function(islandShape,variant) {
 		this.islandShape = islandShape;
 		this.mapRandom.seed = variant;
+	}
+	,go0PlacePoints: function(numberOfPoints) {
+		if(numberOfPoints == null) numberOfPoints = 1000;
+		this.reset();
+		this.points = this.generateRandomPoints(numberOfPoints);
+	}
+	,go1ImprovePoints: function(numLloydIterations) {
+		if(numLloydIterations == null) numLloydIterations = 2;
+		this.improveRandomPoints(this.points,numLloydIterations);
+	}
+	,go2BuildGraph: function() {
+		var voronoi = new com.nodename.delaunay.Voronoi(this.points,null,new as3.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
+		this.buildGraph(this.points,voronoi);
+		this.improveCorners();
+		voronoi.dispose();
+		voronoi = null;
+		this.points = null;
+	}
+	,go3AssignElevations: function(lakeThreshold) {
+		if(lakeThreshold == null) lakeThreshold = 0.3;
+		this.assignCornerElevations();
+		this.assignOceanCoastAndLand(lakeThreshold);
+		this.redistributeElevations(this.landCorners(this.corners));
+		var _g = 0, _g1 = this.corners;
+		while(_g < _g1.length) {
+			var q = _g1[_g];
+			++_g;
+			if(q.ocean || q.coast) q.elevation = 0.0;
+		}
+		this.assignPolygonElevations();
+	}
+	,go4AssignMoisture: function(riverChance) {
+		this.calculateDownslopes();
+		this.calculateWatersheds();
+		this.createRivers(riverChance);
+		this.assignCornerMoisture();
+		this.redistributeMoisture(this.landCorners(this.corners));
+		this.assignPolygonMoisture();
+	}
+	,go5DecorateMap: function() {
+		this.assignBiomes();
 	}
 	,reset: function() {
 		var p, q, edge;
@@ -2429,71 +2538,33 @@ voronoimap.Map.prototype = {
 		if(this.centers == null) this.centers = new Array();
 		if(this.corners == null) this.corners = new Array();
 	}
-	,go0PlacePoints: function() {
-		this.reset();
-		this.points = this.generateRandomPoints();
-	}
-	,go1ImprovePoints: function() {
-		this.improveRandomPoints(this.points);
-	}
-	,go2BuildGraph: function() {
-		var voronoi = new com.nodename.delaunay.Voronoi(this.points,null,new as3.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
-		this.buildGraph(this.points,voronoi);
-		this.improveCorners();
-		voronoi.dispose();
-		voronoi = null;
-		this.points = null;
-	}
-	,go3AssignElevations: function() {
-		this.assignCornerElevations();
-		this.assignOceanCoastAndLand();
-		this.redistributeElevations(this.landCorners(this.corners));
-		var _g = 0, _g1 = this.corners;
-		while(_g < _g1.length) {
-			var q = _g1[_g];
-			++_g;
-			if(q.ocean || q.coast) q.elevation = 0.0;
-		}
-		this.assignPolygonElevations();
-	}
-	,go4AssignMoisture: function() {
-		this.calculateDownslopes();
-		this.calculateWatersheds();
-		this.createRivers(this.RIVER_CHANCE);
-		this.assignCornerMoisture();
-		this.redistributeMoisture(this.landCorners(this.corners));
-		this.assignPolygonMoisture();
-	}
-	,go5DecorateMap: function() {
-		this.assignBiomes();
-	}
-	,generateRandomPoints: function() {
+	,generateRandomPoints: function(NUM_POINTS) {
 		var p, i, points = new Array();
-		var _g1 = 0, _g = this.NUM_POINTS;
-		while(_g1 < _g) {
-			var i1 = _g1++;
+		var _g = 0;
+		while(_g < NUM_POINTS) {
+			var i1 = _g++;
 			p = { x : this.mapRandom.nextDoubleRange(10,this.SIZE.width - 10), y : this.mapRandom.nextDoubleRange(10,this.SIZE.height - 10)};
 			points.push(p);
 		}
 		return points;
 	}
-	,improveRandomPoints: function(points) {
+	,improveRandomPoints: function(points,numLloydIterations) {
 		var i, p, q, voronoi, region;
-		var _g1 = 0, _g = this.NUM_LLOYD_ITERATIONS;
-		while(_g1 < _g) {
-			var i1 = _g1++;
+		var _g = 0;
+		while(_g < numLloydIterations) {
+			var i1 = _g++;
 			voronoi = new com.nodename.delaunay.Voronoi(points,null,new as3.Rectangle(0,0,this.SIZE.width,this.SIZE.height));
-			var _g2 = 0;
-			while(_g2 < points.length) {
-				var p1 = points[_g2];
-				++_g2;
+			var _g1 = 0;
+			while(_g1 < points.length) {
+				var p1 = points[_g1];
+				++_g1;
 				region = voronoi.region(p1);
 				p1.x = 0.0;
 				p1.y = 0.0;
-				var _g3 = 0;
-				while(_g3 < region.length) {
-					var q1 = region[_g3];
-					++_g3;
+				var _g2 = 0;
+				while(_g2 < region.length) {
+					var q1 = region[_g2];
+					++_g2;
 					p1.x += q1.x;
 					p1.y += q1.y;
 				}
@@ -2721,7 +2792,7 @@ voronoimap.Map.prototype = {
 			locations[i1].moisture = i1 / (locations.length - 1);
 		}
 	}
-	,assignOceanCoastAndLand: function() {
+	,assignOceanCoastAndLand: function(lakeThreshold) {
 		var queue = [];
 		var p, q, r, numWater;
 		var _g = 0, _g1 = this.centers;
@@ -2741,7 +2812,7 @@ voronoimap.Map.prototype = {
 				}
 				if(q1.water) numWater += 1;
 			}
-			p1.water = p1.ocean || numWater >= p1.corners.length * this.LAKE_THRESHOLD;
+			p1.water = p1.ocean || numWater >= p1.corners.length * lakeThreshold;
 		}
 		while(queue.length > 0) {
 			p = queue.shift();
@@ -2854,6 +2925,7 @@ voronoimap.Map.prototype = {
 		}
 	}
 	,createRivers: function(riverChance) {
+		riverChance = riverChance == null?(this.SIZE.width + this.SIZE.height) / 4 | 0:riverChance;
 		var i, q, edge;
 		var _g = 0;
 		while(_g < riverChance) {
@@ -3025,10 +3097,9 @@ voronoimap.Roads.__name__ = ["voronoimap","Roads"];
 voronoimap.Roads.prototype = {
 	road: null
 	,roadConnections: null
-	,createRoads: function(map) {
+	,createRoads: function(map,elevationThresholds) {
 		var queue = [];
 		var p, q, r, edge, newLevel;
-		var elevationThresholds = [0,0.05,0.37,0.64];
 		var cornerContour = [];
 		var centerContour = [];
 		var _g = 0, _g1 = map.centers;
@@ -3677,10 +3748,12 @@ voronoimap.Html.S_islandFactor = "#islandFactor";
 voronoimap.Html.S_islandShape = "#islandShape";
 voronoimap.Html.S_lakeThreshold = "#lakeThreshold";
 voronoimap.Html.S_lloydIterations = "#lloydIterations";
+voronoimap.Html.S_numberOfLands = "#numberOfLands";
 voronoimap.Html.S_numberOfPoints = "#numberOfPoints";
 voronoimap.Html.S_oceanRatio = "#oceanRatio";
 voronoimap.Html.S_random = "#random";
 voronoimap.Html.S_riverChance = "#riverChance";
+voronoimap.Html.S_roadElevationThresholds = "#roadElevationThresholds";
 voronoimap.Html.S_seed = "#seed";
 voronoimap.Html.S_shapeRandom = "#shapeRandom";
 voronoimap.Html.S_shapeSeed = "#shapeSeed";
@@ -3691,6 +3764,9 @@ voronoimap.Html.S_viewRivers = "#viewRivers";
 voronoimap.Html.S_viewRoads = "#viewRoads";
 voronoimap.Html.S_viewWatersheds = "#viewWatersheds";
 voronoimap.Html.S_width = "#width";
+voronoimap.Map.DEFAULT_LAKE_THRESHOLD = 0.3;
+voronoimap.Map.DEFAULT_LLOYD_ITERATIONS = 2;
+voronoimap.Map.DEFAULT_NUMBER_OF_POINTS = 1000;
 voronoimap.NoisyEdges.NOISY_LINE_TRADEOFF = 0.5;
 voronoimap.html.CanvasRender.lightVector = new as3.Vector3D(-1,-1,0);
 voronoimap.html.Style.displayColors = { OCEAN : 4473978, COAST : 3355482, LAKESHORE : 2250120, LAKE : 3368601, RIVER : 2250120, MARSH : 3106406, ICE : 10092543, BEACH : 10522743, ROAD1 : 4465169, ROAD2 : 5583650, ROAD3 : 6702131, BRIDGE : 6842464, LAVA : 13382451, SNOW : 16777215, TUNDRA : 12303274, BARE : 8947848, SCORCHED : 5592405, TAIGA : 10070647, SHRUBLAND : 8952183, TEMPERATE_DESERT : 13226651, TEMPERATE_RAIN_FOREST : 4491349, TEMPERATE_DECIDUOUS_FOREST : 6788185, GRASSLAND : 8956501, SUBTROPICAL_DESERT : 13810059, TROPICAL_RAIN_FOREST : 3372885, TROPICAL_SEASONAL_FOREST : 5609796};

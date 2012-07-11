@@ -839,7 +839,6 @@ class Map {
 				targetLandCountFound = true;
 			else
 				pointCount += (lands < numberOfLands ? 1 : -1);
-			trace([pointCount, lands]);	
 		} while (!targetLandCountFound && Timer.stamp() - startTime < timeoutSeconds);
 		
 		return map;

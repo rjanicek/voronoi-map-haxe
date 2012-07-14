@@ -873,7 +873,7 @@ class Map {
 	 * Rebuilds the map varying the number of points until desired number of land centers are generated or timeout is reached.
 	 * Not an efficient algorithim, but gets the job done.
 	 */
-	public static function tryMutateMapPointsToGetNumberLands( map : Map, numberOfLands : Int, timeoutSeconds = 2, initialNumberOfPoints = DEFAULT_NUMBER_OF_POINTS, numLloydIterations = DEFAULT_LLOYD_ITERATIONS, lakeThreshold = DEFAULT_LAKE_THRESHOLD ) : Map {
+	public static function tryMutateMapPointsToGetNumberLands( map : Map, numberOfLands : Int, timeoutSeconds = 10, initialNumberOfPoints = DEFAULT_NUMBER_OF_POINTS, numLloydIterations = DEFAULT_LLOYD_ITERATIONS, lakeThreshold = DEFAULT_LAKE_THRESHOLD ) : Map {
 		var pointCount = initialNumberOfPoints;
 		var startTime = Timer.stamp();
 		var targetLandCountFound = false;

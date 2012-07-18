@@ -17,7 +17,7 @@
   <classpaths>
     <class path="src" />
     <class path="lib\janicek-core-haxe\src" />
-    <class path="lib\jasmine-haxe" />
+    <class path="lib\jasmine-haxe\src" />
     <class path="lib\html5-haxe" />
   </classpaths>
   <!-- Build options -->
@@ -26,7 +26,7 @@
     <option flashStrict="False" />
     <option mainClass="voronoimap.Main" />
     <option enabledebug="False" />
-    <option additional="-debug&#xA;--dead-code-elimination" />
+    <option additional="--js-modern&#xA;--dead-code-elimination&#xA;-debug" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

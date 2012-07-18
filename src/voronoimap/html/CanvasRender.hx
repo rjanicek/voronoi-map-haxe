@@ -69,7 +69,8 @@ typedef ElevationGradientColors = {
 
 class CanvasRender {
 	
-	public static function graphicsReset(c:CanvasRenderingContext2D, mapWidth:Int, mapHeight:Int, displayColors:DisplayColors):Void {
+	public static function graphicsReset( c : CanvasRenderingContext2D, mapWidth : Int, mapHeight : Int, displayColors : DisplayColors ) : Void {
+		c.lineWidth = 1.0;
 		c.clearRect(0, 0, 2000, 2000);
 		c.fillStyle = "#bbbbaa";
 		c.fillRect(0, 0, 2000, 2000);
@@ -224,9 +225,10 @@ class CanvasRender {
 		}
     }
 	
-    // Render the interior of polygons
-
-    public static function renderPolygons(graphics:CanvasRenderingContext2D, colors:Dynamic, gradientFillProperty:String, colorOverrideFunction:Int->Center->Center->Edge->DisplayColors->Int, map:Map, noisyEdges:NoisyEdges):Void {
+	/**
+	 * Render the interior of polygons
+	 */
+    public static function renderPolygons( graphics : CanvasRenderingContext2D, colors : Dynamic, gradientFillProperty : String, colorOverrideFunction : Int->Center->Center->Edge->DisplayColors->Int, map : Map, noisyEdges : NoisyEdges ) : Void {
       var p:Center, r:Center;
 
       // My Voronoi polygon rendering doesn't handle the boundary
@@ -426,10 +428,12 @@ class CanvasRender {
 		}
 	}
 	
-    // Render the exterior of polygons: coastlines, lake shores,
-    // rivers, lava fissures. We draw all of these after the polygons
-    // so that polygons don't overwrite any edges.
-    public static function renderEdges(graphics:CanvasRenderingContext2D, colors:Dynamic, map:Map, noisyEdges:NoisyEdges, lava:Lava, renderRivers = true):Void {
+	/**
+	 * Render the exterior of polygons: coastlines, lake shores,
+	 * rivers, lava fissures. We draw all of these after the polygons
+	 * so that polygons don't overwrite any edges.
+	 */
+    public static function renderEdges( graphics : CanvasRenderingContext2D, colors : Dynamic, map : Map, noisyEdges : NoisyEdges, lava : Lava, renderRivers = true ) : Void {
 		var p:Center, r:Center, edge:Edge;
 		
 		for (p in map.centers) {
@@ -459,16 +463,45 @@ class CanvasRender {
 					// River edge
 					graphics.lineWidth = Math.sqrt(edge.river);
 					graphics.strokeStyle = HtmlColorCore.intToHexColor(colors.RIVER);
-					
 				} else {
-					// No edge
 					continue;
 				}
+				
 				graphics.beginPath();
 				graphics.moveTo(noisyEdges.path0[edge.index][0].x, noisyEdges.path0[edge.index][0].y);
 				drawPathForwards(graphics, noisyEdges.path0[edge.index]);
 				drawPathBackwards(graphics, noisyEdges.path1[edge.index]);
 				graphics.stroke();
+				graphics.closePath();
+			}
+		}
+    }
+	
+	public static function renderAllEdges( graphics : CanvasRenderingContext2D, strokeStyle : String, map : Map, noisyEdges : NoisyEdges) : Void {
+		var p:Center, r:Center, edge:Edge;
+
+		graphics.lineWidth = 5;
+		graphics.strokeStyle = strokeStyle;
+
+		for (p in map.centers) {
+			for (r in p.neighbors) {
+				edge = map.lookupEdgeFromCenter(p, r);
+
+				if (noisyEdges.path0[edge.index] == null
+					|| noisyEdges.path1[edge.index] == null
+					|| p.water) {
+					// It's at the edge of the map or water
+					continue;
+				}
+
+				// edge
+
+				graphics.beginPath();
+				graphics.moveTo(noisyEdges.path0[edge.index][0].x, noisyEdges.path0[edge.index][0].y);
+				drawPathForwards(graphics, noisyEdges.path0[edge.index]);
+				drawPathBackwards(graphics, noisyEdges.path1[edge.index]);
+				graphics.stroke();
+				graphics.closePath();
 			}
 		}
     }
@@ -481,9 +514,11 @@ class CanvasRender {
 		}
     }
 
-    // Helper function for drawing triangles with gradients. This
-    // function sets up the fill on the graphics object, and then
-    // calls fillFunction to draw the desired path.
+	/**
+	 * Helper function for drawing triangles with gradients. This
+	 * function sets up the fill on the graphics object, and then
+	 * calls fillFunction to draw the desired path.
+	 */
     private static function drawGradientTriangle(graphics:CanvasRenderingContext2D,
                                           v1:Vector3D, v2:Vector3D, v3:Vector3D,
                                           colors:Array<Int>, fillFunction:Void->Void):Void {

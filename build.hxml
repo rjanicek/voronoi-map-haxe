@@ -1,0 +1,8 @@
+-cp src
+-cp lib/janicek-core-haxe/src
+-cp lib/html5-haxe
+-js bin/voronoi-map.js
+-main voronoimap.Main
+--js-modern
+--dead-code-elimination
+-debug

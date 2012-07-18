@@ -54,7 +54,7 @@ class MapSpec {
 			   var watersheds = new Watersheds();
 			   watersheds.createWatersheds(map);
 				var noisyEdges = new NoisyEdges();
-			   noisyEdges.buildNoisyEdges(map, lava, map.mapRandom);
+			   noisyEdges.buildNoisyEdges(map, lava, map.mapRandom.seed);
 			   J.expect(roads).not.toBeNull();
 			   J.expect(watersheds).not.toBeNull();
 			   J.expect(noisyEdges).not.toBeNull();

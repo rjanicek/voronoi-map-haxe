@@ -9,6 +9,8 @@ Flash dependencies removed.
 
 Make sure you run ``git submodule update --init`` to clone the external libraries.
 
+Built with Haxe 2.10 and FlashDevelop.
+
 Demo -> http://rjanicek.github.com/voronoi-map-haxe
 
 Specs -> http://rjanicek.github.com/voronoi-map-haxe/specs

@@ -859,7 +859,7 @@ class Map {
      * Determine whether a given point should be on the island or in the water.
      */
     public function inside(p:Point):Boolean {
-      return islandShape({x:2*(p.x/SIZE.width - 0.5), y : 2*(p.y/SIZE.height - 0.5)});
+      return islandShape( { x:2 * (p.x / SIZE.width - 0.5), y : 2 * (p.y / SIZE.height - 0.5) } );
     }
 	
 	// ------------------------------------------------------------------------

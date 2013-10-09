@@ -16,7 +16,7 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="lib\janicek-core-haxe\src" />
+    <class path="lib\janicek-core-haxe-6630d81bc734a8886e0156fd3a95e7dd3104bd0a\src" />
     <class path="lib\jasmine-haxe\src" />
     <class path="lib\html5-haxe" />
   </classpaths>
@@ -26,7 +26,7 @@
     <option flashStrict="False" />
     <option mainClass="voronoimap.Main" />
     <option enabledebug="False" />
-    <option additional="--js-modern&#xA;--dead-code-elimination&#xA;-debug" />
+    <option additional="-dce full&#xA;-D noEmbedJS" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -38,7 +38,7 @@
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
-    <!-- example: <hidden path="..." /> -->
+    <hidden path="obj" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand>$(CompilerPath)\haxe $(ProjectDir)\build-test.hxml</preBuildCommand>

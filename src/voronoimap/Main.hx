@@ -4,7 +4,7 @@ import co.janicek.core.html.CanvasCore;
 import co.janicek.core.html.HtmlColorCore;
 import co.janicek.core.math.RandomCore;
 import de.polygonal.math.PM_PRNG;
-import haxe.Firebug;
+import haxe.Timer;
 import html5.Canvas;
 import html5.CanvasRenderingContext2D;
 import html5.File;
@@ -12,6 +12,7 @@ import html5.FileList;
 import html5.FileReader;
 import html5.Image;
 import html5.typedArrays.ArrayBuffer;
+import js.Browser;
 import js.JQuery;
 import js.Lib;
 import voronoimap.html.CanvasRender;
@@ -74,7 +75,6 @@ class Main {
 	private static var state : State;
 	
 	static function main() {
-		Firebug.redirectTraces();
 		initializeUi();
 		state = generate();
 	}
@@ -118,8 +118,8 @@ class Main {
 
 		new JQuery([Html.S_invertImage, Html.S_imageThreshold].toString()).change(function(e) { updateThumb(); } );
 		
-		new JQuery(Html.S_width).val(Std.string(Lib.window.innerWidth));
-		new JQuery(Html.S_height).val(Std.string(Lib.window.innerHeight));
+		new JQuery(Html.S_width).val(Std.string(Browser.window.innerWidth));
+		new JQuery(Html.S_height).val(Std.string(Browser.window.innerHeight));
 		
 		new JQuery(Html.S_view).change(function(e) {
 			switch(new JQuery(Html.S_view).val()) {
@@ -161,22 +161,23 @@ class Main {
 	}	
 	
 	public static function getContext():CanvasRenderingContext2D {
-		var canvas:Canvas = cast Lib.document.getElementById(Html.ID_map);
+		var canvas:Canvas = cast Browser.document.getElementById(Html.ID_map);
 		return canvas.getContext("2d");
 	}
 	
 	private static function findOrCreateCanvas():Canvas {
-		var canvas:Canvas = cast Lib.document.getElementById(Html.ID_map);
+		var canvas:Canvas = cast Browser.document.getElementById(Html.ID_map);
 		if (canvas == null) {
-			canvas = cast Lib.document.createElement("canvas");
+			canvas = cast Browser.document.createElement("canvas");
 			canvas.id = Html.ID_map;
-			Lib.document.body.appendChild(canvas);
+			Browser.document.body.appendChild(canvas);
 		}
 		
 		return canvas;
 	}
 	
 	public static function generate() : State {
+		var start = Timer.stamp();		
 		var state = { map : null, noisyEdges : null, roads : null, watersheds : null, lava : null };
 		
 		var canvas = findOrCreateCanvas();
@@ -223,11 +224,22 @@ class Main {
 		state.map.go4AssignMoisture(new JQuery(Html.S_riverChance).val().parseInt());
 		state.map.go5DecorateMap();
 		
-		var thresholds = new JQuery(Html.S_roadElevationThresholds).val().split(",").map(callback(Std.parseFloat)).array();
+		var thresholds = new JQuery(Html.S_roadElevationThresholds).val().split(",").map(Std.parseFloat.bind()).array();
 		state.roads.createRoads(state.map, thresholds);
 		state.watersheds.createWatersheds(state.map);
 		state.noisyEdges.buildNoisyEdges(state.map, state.lava, seed, new JQuery(Html.S_edgeNoise).val().parseFloat());
+		
+		var generateMs = Std.int((Timer.stamp() - start) * 1000);
+		new JQuery('#generateMs').text(Std.string(generateMs));
+		start = Timer.stamp();
+		
 		render(state);
+		
+		var renderMs = Std.int((Timer.stamp() - start) * 1000);
+		new JQuery('#renderMs').text(Std.string(renderMs));
+		
+		new JQuery('#totalMs').text(Std.string(renderMs + generateMs));
+		
 		return state;
 	}
 	

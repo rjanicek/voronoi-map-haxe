@@ -233,7 +233,6 @@ class Map {
       // Option 3 is implemented here. If it's run for too many iterations,
       // it will turn into a grid, but convergence is very slow, and we only
       // run it a few times.
-
 		var i:Int, p:Point, q:Point, voronoi:Voronoi, region:Vector<Point>;
 		for (i in 0...numLloydIterations) {
 			voronoi = new Voronoi(points, null, new Rectangle(0, 0, SIZE.width, SIZE.height));
@@ -395,7 +394,7 @@ class Map {
           edge.index = edges.length;
           edge.river = 0;
           edges.push(edge);
-          edge.midpoint = if(vedge.p0 != null && vedge.p1 != null) PointCore.interpolate(vedge.p0, vedge.p1, 0.5);
+          edge.midpoint = (vedge.p0 != null && vedge.p1 != null) ? PointCore.interpolate(vedge.p0, vedge.p1, 0.5) : null;
 		  
           // Edges point to corners. Edges point to centers. 
           edge.v0 = makeCorner(vedge.p0);

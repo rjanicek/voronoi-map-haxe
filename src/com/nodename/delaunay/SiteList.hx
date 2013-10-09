@@ -40,8 +40,8 @@ class SiteList implements IDisposable {
 		return _sites.push(site);
 	}
 	
-	public var length(getLength, null):Int;
-	private inline function getLength():Int
+	public var length(get_length, null):Int;
+	private inline function get_length():Int
 	{
 		return _sites.length;
 	}

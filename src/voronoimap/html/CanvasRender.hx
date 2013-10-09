@@ -84,7 +84,7 @@ class CanvasRender {
 		var B:Vector3D = new Vector3D(r.point.x, r.point.y, r.elevation);
 		var C:Vector3D = new Vector3D(s.point.x, s.point.y, s.elevation);
 		var normal:Vector3D = B.subtract(A).crossProduct(C.subtract(A));
-		if (normal.z < 0) { normal.scaleBy(-1); }
+		if (normal.z < 0) { normal.scaleBy( -1); }
 		normal.normalize();
 		var light:Number = 0.5 + 35*normal.dotProduct(lightVector);
 		if (light < 0) light = 0;
@@ -95,6 +95,7 @@ class CanvasRender {
     public static function colorWithSlope(color:Int, p:Center, q:Center, edge:Edge, displayColors:DisplayColors):Int {
 		var r:Corner = edge.v0;
 		var s:Corner = edge.v1;
+
 		if (r.isNull() || s.isNull()) {
 			// Edge of the map
 			return displayColors.OCEAN;
@@ -102,7 +103,10 @@ class CanvasRender {
 			return color;
 		}
 
-		if (q != null && p.water == q.water) color = HtmlColorCore.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
+		if (q != null && p.water == q.water) { 
+			color = HtmlColorCore.interpolateColor(color, Reflect.field(displayColors, q.biome), 0.4);
+		}
+
 		var colorLow:Int = HtmlColorCore.interpolateColor(color, 0x333333, 0.7);
 		var colorHigh:Int = HtmlColorCore.interpolateColor(color, 0xffffff, 0.3);
 		var light:Number = calculateLighting(p, r, s);
@@ -269,6 +273,7 @@ class CanvasRender {
               }
 
               if (gradientFillProperty != null) {
+
                 // We'll draw two triangles: center - corner0 -
                 // midpoint and center - midpoint - corner1.
                 var corner0:Corner = edge.v0;

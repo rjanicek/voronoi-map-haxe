@@ -1,0 +1,4 @@
+-cp ../
+-cp jasmine-haxe-1.0.2
+-js bin/html5-haxe-test.js
+-main html5Test.Main

@@ -66,6 +66,9 @@ class Voronoi {
 		_triangles = new Vector<Triangle>();
 		_edges = new Vector<Edge>();
 		fortunesAlgorithm();
+//		for(edge in _edges) {
+//			trace([edge.a, edge.b, edge.c]);
+//		}
 	}
 	
 	/**
@@ -75,7 +78,7 @@ class Voronoi {
 	 * Prevent this case until it's possible to store duplicate points coords.
 	 */
 	private function makeSureNoDuplicatePoints(points:Vector<Point>) {
-		var h = new Hash<Point>();
+		var h = new Map<String, Point>();
 		for (p in points) {
 			if (h.exists(p.hash())) {
 				throw "Duplicate points not supported yet!";

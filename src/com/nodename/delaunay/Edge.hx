@@ -72,9 +72,9 @@ class Edge {
 	//private static const LINESPRITE:Sprite = new Sprite();
 	//private static const GRAPHICS:Graphics = LINESPRITE.graphics;
 	
-	public var delaunayLineBmp(getDelaunayLineBmp, never):BitmapData;
+	public var delaunayLineBmp(get_delaunayLineBmp, never):BitmapData;
 	private var _delaunayLineBmp:BitmapData;
-	private function getDelaunayLineBmp():BitmapData
+	private function get_delaunayLineBmp():BitmapData
 	{
 		if (_delaunayLineBmp == null)
 		{
@@ -195,8 +195,8 @@ class Edge {
 	public var clippedEnds(default, null):Dictionary<Point>;
 	// unless the entire Edge is outside the bounds.
 	// In that case visible will be false:
-	public var visible(getVisible, never):Boolean;
-	private inline function getVisible():Boolean
+	public var visible(get_visible, never):Boolean;
+	private inline function get_visible():Boolean
 	{
 		return clippedEnds != null;
 	}

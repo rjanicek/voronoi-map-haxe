@@ -1,0 +1,25 @@
+
+html5-haxe
+==========
+HaXe/Javascript html5 typedef signatures not available in the haXe std library.
+
+Tested with haXe 2.07 and Chrome.
+
+html5 		- haXe html5 bindings.
+html5Test 	- Jasmine specs for html5.
+
+LINKS
+-----
+https://github.com/tong/hx.html5
+
+http://www.w3.org/TR/html5/
+
+https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html
+
+http://www.w3.org/TR/webstorage/
+http://www.w3.org/TR/file-system-api/
+http://dev.w3.org/geo/api/
+https://developer.mozilla.org/En/E4X/Processing_XML_with_E4X
+
+http://www.webrtc.org/
+http://dev.w3.org/2011/webrtc/editor/webrtc.html

@@ -1,5 +1,7 @@
 package specs;
 
+import haxe.Json;
+import haxe.Serializer;
 import jasmine.J;
 import voronoimap.IslandShape;
 import voronoimap.Lava;
@@ -27,18 +29,19 @@ class MapSpec {
 				map.go0PlacePoints(numPoints);
 				J.expect(map.points.length).toBe(numPoints);
 			});
-			
+
 			J.it("should improve points", function() {
 				map.go1ImprovePoints();
+
 				J.expect(map.points.length).toBe(numPoints);
 			});
 
 			J.it("should build a graph", function() {
 				map.go2BuildGraph();
+trace('map.corners.length', map.corners.length);				
 				map.assignBiomes();
 				J.expect(true).toBeTruthy();
 			});
-
 			J.it("should add features", function() {
 				map.go3AssignElevations();
 				map.go4AssignMoisture();

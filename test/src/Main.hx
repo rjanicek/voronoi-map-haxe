@@ -1,4 +1,3 @@
-import haxe.Firebug;
 import jasmine.Jasmine;
 import js.Lib;
 import specs.AS3Spec;
@@ -11,8 +10,7 @@ import specs.VoronoiSpec;
 class Main {
 	
 	static function main() {
-		Firebug.redirectTraces();
-		trace(Std.format("Testing..."));
+		trace("Testing...");
 
 		new AS3Spec();
 		new ConversionCoreSpec();

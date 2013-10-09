@@ -19,7 +19,7 @@ class VoronoiSpec {
 			J.it("should make voronoi", function() {
 				var r = 1;
 				var points = new Vector<Point>();
-				for (i in 0...100) {
+				for (i in 0...5) {
 					var x = ((r = r.nextParkMiller()).toFloatRange(1, 99));
 					var y = ((r = r.nextParkMiller()).toFloatRange(1, 99));
 					var p = { x:x, y:y };

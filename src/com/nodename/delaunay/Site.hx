@@ -372,13 +372,13 @@ class Site implements ICoord {
 		}
 	}
 
-	public var x(getX, null):Number;
-	private inline function getX():Number
+	public var x(get_x, null):Number;
+	private inline function get_x():Number
 	{
 		return _coord.x;
 	}
-	public var y(getY, null):Number;
-	private inline function getY():Number
+	public var y(get_y, null):Number;
+	private inline function get_y():Number
 	{
 		return _coord.y;
 	}

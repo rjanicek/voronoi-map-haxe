@@ -11,14 +11,14 @@ class EdgeList implements IDisposable {
 	private var _hashsize:Int;
 	private var _hash:Vector<Halfedge>;
 	private var _leftEnd:Halfedge;
-	public var leftEnd(getLeftEnd, never):Halfedge;
-	public inline function getLeftEnd():Halfedge
+	public var leftEnd(get_leftEnd, never):Halfedge;
+	public inline function get_leftEnd():Halfedge
 	{
 		return _leftEnd;
 	}
 	private var _rightEnd:Halfedge;
-	public var rightEnd(getRightEnd, never):Halfedge;
-	public inline function getRightEnd():Halfedge
+	public var rightEnd(get_rightEnd, never):Halfedge;
+	public inline function get_rightEnd():Halfedge
 	{
 		return _rightEnd;
 	}
